@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SpotiZado</string>
+
+    <!-- Enlaces -->
+    <string name="link_not_ready">El reproductor aún no está listo. Abriendo SpotiZado…</string>
+
+    <!-- Diagnóstico -->
+    <string name="diag_title">Diagnóstico</string>
+    <string name="diag_network_mode">Modo de red</string>
+    <string name="diag_guard_mode">Neutralización</string>
+    <string name="diag_rules">Reglas cargadas</string>
+    <string name="diag_rules_version">Versión de la lista</string>
+    <string name="diag_blocked_session">Bloqueos (sesión)</string>
+    <string name="diag_blocked_total">Bloqueos (total)</string>
+    <string name="diag_ads_neutralized">Anuncios neutralizados</string>
+    <string name="diag_refresh">Actualizar</string>
+    <string name="diag_reset">Reiniciar contadores</string>
+    <string name="diag_reload">Recargar reproductor</string>
+
+    <!-- Estados del reproductor -->
+    <string name="player_waiting_title">Iniciando el reproductor…</string>
+    <string name="player_waiting_detail">Si se queda aquí, comprueba que Android System WebView está actualizado.</string>
+    <string name="player_login_title">Falta iniciar sesión</string>
+    <string name="player_login_detail">Usa «Email + contraseña (login clásico)»: el login de Google está bloqueado en los WebView.</string>
+    <string name="player_degraded_title">Reproductor degradado</string>
+    <string name="player_degraded_detail">Abre el diagnóstico para ver qué capa está fallando.</string>
+    <string name="player_stopped_title">Servicio detenido</string>
+    <string name="player_stopped_detail">Actívalo en Ajustes para cargar el reproductor.</string>
+
+    <!-- Bloqueo -->
+    <string name="adblock_section">Bloqueo</string>
+    <string name="adblock_network">Filtrado de red</string>
+    <string name="adblock_guard">Neutralización de anuncios</string>
+    <string name="adblock_off">Apagado</string>
+    <string name="adblock_trackers">Rastreadores</string>
+    <string name="adblock_strict">Estricto</string>
+    <string name="guard_silent">Silenciar</string>
+    <string name="guard_skip">Saltar</string>
+    <string name="guard_silent_skip">Silenciar + saltar</string>
+
+    <!-- Interfaz -->
+    <string name="settings_ui">Interfaz</string>
+    <string name="settings_player_mode">Modo del reproductor</string>
+    <string name="settings_mobile">Móvil</string>
+    <string name="settings_desktop">Escritorio</string>
+    <string name="settings_amoled">Tema AMOLED</string>
+    <string name="settings_close_now_playing">Cerrar «Reproduciendo ahora»</string>
+    <string name="settings_battery_saver">Ahorro de batería</string>
+
+    <!-- Lista -->
+    <string name="settings_blocklist">Lista de bloqueo</string>
+    <string name="settings_blocklist_auto">Actualizar automáticamente</string>
+    <string name="settings_blocklist_update">Actualizar ahora</string>
+    <string name="settings_blocklist_updating">Actualizando…</string>
+
+    <!-- Sistema -->
+    <string name="settings_system">Servicio y sistema</string>
+    <string name="settings_swipe_stop">Detener al deslizar la app</string>
+    <string name="settings_hp_play">Reproducir con auriculares</string>
+    <string name="settings_hp_stop">Pausar sin auriculares</string>
+    <string name="settings_bt_play">Reproducir con Bluetooth</string>
+    <string name="settings_bt_stop">Pausar sin Bluetooth</string>
+
+    <!-- Notificación -->
+    <string name="notification_channel_name">Reproducción</string>
+    <string name="notification_channel_desc">Controles del reproductor de SpotiZado</string>
+</resources>

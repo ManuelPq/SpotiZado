@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fondo del icono adaptativo: verde muestreado del icono original. -->
+    <color name="ic_launcher_background">#1ED860</color>
+</resources>

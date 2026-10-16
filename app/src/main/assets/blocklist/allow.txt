@@ -1,0 +1,32 @@
+# SpotiZado — lista blanca CRITICA (nunca bloquear)
+# Estos hosts son imprescindibles para iniciar sesion y reproducir. Si alguna
+# lista remota los incluye, se descartan: es la defensa contra 'blocklist
+# agresiva que rompe la reproduccion' (fallo documentado por SpotiDuck).
+# Reglas: 26
+
+accounts.spotify.com
+ap-gue1.spotify.com
+api-partner.spotify.com
+api.spotify.com
+apresolve.spotify.com
+audio-ak.spotify.com
+audio-fa.scdn.co
+audio4-fa.scdn.co
+cdn.spotifycdn.com
+challenge.spotify.com
+clienttoken.spotify.com
+consent.spotify.com
+dealer.spotify.com
+encore.scdn.co
+fundingchoicesmessages.google.com
+gae2-spclient.spotify.com
+gew1-spclient.spotify.com
+gew4-spclient.spotify.com
+i.scdn.co
+image-cdn-ak.spotifycdn.com
+image-cdn-fa.spotifycdn.com
+login5.spotify.com
+mosaic.scdn.co
+open.spotify.com
+seeded-session.spotify.com
+spclient.wg.spotify.com

@@ -1,0 +1,225 @@
+package com.imparable.spoti.web
+
+import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import com.imparable.spoti.adblock.AdBlocker
+import com.imparable.spoti.bridge.PlayerBridge
+import java.io.ByteArrayInputStream
+
+/**
+ * Cliente del WebView: inyecta los scripts por fase de carga y aplica la capa 1
+ * del bloqueo (filtrado de red por host) mediante `shouldInterceptRequest`.
+ *
+ * Nota: en el APK original de Spotifuck este método no se pudo descompilar, así
+ * que su lógica exacta se desconoce. Aquí se implementa desde cero, con una
+ * diferencia importante: **no se corta la petición con una respuesta vacía**
+ * (lo que provoca errores de reproducción difíciles de diagnosticar), sino que
+ * el bloqueo se registra y se devuelve la respuesta vacía solo para hosts que
+ * no son de contenido (garantizado por la lista blanca de [AdBlocker]).
+ */
+class PlayerWebViewClient(
+    private val bridge: PlayerBridge
+) : WebViewClient() {
+
+    companion object {
+        private const val TAG = "PlayerWebViewClient"
+        const val URL_PLAYER = "https://open.spotify.com/"
+
+        /**
+         * Página de login **con el formulario de email y contraseña ya visible**.
+         *
+         * `allow_password=1` es imprescindible: sin ese parámetro Spotify ofrece
+         * solo enlaces mágicos y proveedores externos, y Google bloquea el login
+         * dentro de un WebView (`disallowed_useragent`). El APK original cargaba
+         * la URL sin el parámetro y luego intentaba **inyectar un enlace** con un
+         * selector único y frágil (`section>div>div>div>div>a:first-child`): si Spotify
+         * cambiaba el marcado, el usuario se quedaba sin forma de entrar.
+         */
+        const val URL_LOGIN = "https://accounts.spotify.com/login?allow_password=1"
+
+        const val PREFIX_PLAYER = "https://open.spotify.com"
+        private const val FACEBOOK_CONSENT = "https://www.facebook.com/privacy/consent/gdp/"
+    }
+
+    @Volatile
+    var adBlocker: AdBlocker? = null
+
+    /**
+     * URL del documento que está cargado ahora mismo.
+     *
+     * Hace falta para decidir **en qué páginas** se aplica cada capa: el spoof de
+     * escritorio y el bloqueo de red solo tienen sentido en el reproductor.
+     */
+    @Volatile
+    private var currentUrl: String = ""
+
+    /** ¿Estamos dentro del reproductor (y no en el login u otra página)? */
+    private val onPlayerPage: Boolean get() = currentUrl.startsWith(PREFIX_PLAYER)
+
+    /**
+     * Perfil aplicado al WebView. El reproductor necesita perfil de escritorio y
+     * la página de login, perfil móvil; cambiar de uno a otro **después** de que
+     * la página se haya cargado no basta (ya se envió el UA y ya se maquetó), así
+     * que al volver al reproductor se recarga una vez con el perfil correcto.
+     */
+    @Volatile
+    private var profileIsDesktop: Boolean? = null
+
+    /**
+     * Perfil con el que **se pidió** el documento que se está cargando ahora.
+     *
+     * Es distinto de [profileIsDesktop] y la distinción importa: `onPageStarted`
+     * cambia el perfil antes de que termine la carga, así que comparar contra el
+     * perfil «actual» en `onPageFinished` siempre daba «ya está bien» y la
+     * recarga con perfil de escritorio **nunca se disparaba**.
+     */
+    @Volatile
+    private var loadedWithDesktop: Boolean = false
+
+    /** Cambia el perfil solo si hace falta y deja constancia. */
+    private fun switchProfile(view: WebView, desktop: Boolean) {
+        if (profileIsDesktop == desktop) return
+        PlayerWebViewFactory.applyProfile(view, desktop)
+        profileIsDesktop = desktop
+    }
+
+    override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+        super.onPageStarted(view, url, favicon)
+        currentUrl = url
+        bridge.onPageStarted(url)
+
+        val isPlayer = url.startsWith(PREFIX_PLAYER)
+        // Lo que importa es con qué perfil se pidió ESTA carga, no con cuál se
+        // quedará el WebView a partir de ahora.
+        loadedWithDesktop = profileIsDesktop == true
+        switchProfile(view, desktop = isPlayer)
+
+        // Spoof de escritorio: solo en el reproductor. Es el script que hace que
+        // Spotify sirva el reproductor de ESCRITORIO dentro del WebView, que es
+        // el que expone los selectores que usan el control y el AdGuard.
+        // En el login se aplica lo contrario (perfil móvil) porque esa página es
+        // responsive y necesita el ancho real del teléfono.
+        if (isPlayer) {
+            view.evaluateJavascript(bridge.composer.buildEnvSpoofScript(), null)
+        }
+    }
+
+    override fun onPageFinished(view: WebView, url: String) {
+        super.onPageFinished(view, url)
+        currentUrl = url
+
+        when {
+            // Consentimiento GDPR de Facebook: ayuda puntual y se acaba.
+            url.startsWith(FACEBOOK_CONSENT) ->
+                view.evaluateJavascript(bridge.composer.buildLoginScript(), null)
+
+            // Login: se añaden los ayudantes (enlace clásico y detección de sesión).
+            url.contains("accounts.spotify.com") || url.contains("/login") -> {
+                // Refuerzo: la página de login se cargó con perfil móvil, y el
+                // formulario ya está en el DOM. El spoof de escritorio NO se aplica
+                // aquí (rompería el maquetado), solo la ayuda de login.
+                view.evaluateJavascript(bridge.composer.buildLoginScript(), null)
+            }
+
+            // Reproductor: si venimos de una página con perfil móvil (p. ej. tras
+            // iniciar sesión), esta carga trajo el reproductor MÓVIL. Se recarga
+            // una vez con perfil de escritorio, que es el que expone los selectores
+            // que usan el control y el AdGuard.
+            url.startsWith(PREFIX_PLAYER) && !loadedWithDesktop -> {
+                switchProfile(view, desktop = true)
+                view.post { view.reload() }
+            }
+
+            // Reproductor con el perfil correcto: se inyecta el controlador
+            // SIEMPRE, esté o no marcada la sesión. Antes dependía de un heurístico
+            // (el botón `web-player-link`) y, si no aparecía, no se inyectaba nada:
+            // sin controles, sin AdGuard y sin pista alguna de por qué.
+            url.startsWith(PREFIX_PLAYER) -> bridge.onPlayerPageReady(view)
+
+            else -> bridge.requestLoginDetection(view)
+        }
+    }
+
+    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        val blocker = adBlocker ?: return null
+
+        // El bloqueo de red actúa **solo** en el reproductor.
+        //
+        // En el login no hay anuncios que bloquear y sí mucho que romper: la
+        // pantalla de consentimiento GDPR (en la UE es obligatoria y se sirve
+        // desde `fundingchoicesmessages.google.com`, que estaba en la lista de
+        // bloqueo) y el propio formulario de acceso. Si esa pantalla no carga,
+        // el formulario nunca aparece: el síntoma exacto que se reportó.
+        if (!onPlayerPage) return null
+
+        val uri: Uri = request.url
+        if (!blocker.shouldBlock(uri.host)) return null
+
+        Log.d(TAG, "Bloqueado: ${uri.host}${uri.path}")
+        // 204 sin cuerpo: no se propaga un error de red, simplemente no hay nada
+        // que entregar. La lista blanca garantiza que el host no es de contenido.
+        return WebResourceResponse(
+            "text/plain",
+            "utf-8",
+            204,
+            "Blocked by SpotiZado",
+            emptyMap(),
+            ByteArrayInputStream(ByteArray(0))
+        )
+    }
+
+    override fun onReceivedError(
+        view: WebView,
+        request: WebResourceRequest,
+        error: android.webkit.WebResourceError
+    ) {
+        super.onReceivedError(view, request, error)
+        // Solo se reportan fallos del documento principal: los recursos
+        // bloqueados por la lista generan "errores" que no son problemas.
+        if (request.isForMainFrame) {
+            bridge.onMainFrameError(error.errorCode, error.description?.toString() ?: "")
+        }
+    }
+
+    /** Concede permisos de medios que pide el reproductor (p. ej. EME/vídeo). */
+    class PlayerChromeClient : WebChromeClient() {
+        override fun onPermissionRequest(request: PermissionRequest) {
+            request.grant(request.resources)
+        }
+
+        /**
+         * Ventanas emergentes.
+         *
+         * Spotify abre algunas en el login y en flujos de OAuth. Con
+         * `setSupportMultipleWindows(true)` el WebView **exige** que alguien
+         * atienda `onCreateWindow`; si nadie lo hace, la ventana no se abre y el
+         * flujo se queda colgado sin error visible. Aquí se redirige la emergente
+         * al mismo WebView, que es lo que necesita un reproductor de una sola vista.
+         */
+        override fun onCreateWindow(
+            view: WebView,
+            isDialog: Boolean,
+            isUserGesture: Boolean,
+            resultMsg: android.os.Message
+        ): Boolean {
+            val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
+            transport.webView = view
+            resultMsg.sendToTarget()
+            return true
+        }
+
+        override fun onConsoleMessage(msg: android.webkit.ConsoleMessage): Boolean {
+            if (msg.messageLevel() == android.webkit.ConsoleMessage.MessageLevel.ERROR) {
+                Log.w(TAG, "JS: ${msg.message()} (${msg.sourceId()}:${msg.lineNumber()})")
+            }
+            return true
+        }
+    }
+}

@@ -1,0 +1,25 @@
+# Salidas de compilación
+build/
+app/build/
+.gradle/
+*.apk
+!releases/*.apk
+*.aab
+!releases/*.aab
+*.ap_
+*.dex
+
+# Configuración local (contiene rutas absolutas del equipo)
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystores — nunca al repositorio
+*.jks
+*.keystore

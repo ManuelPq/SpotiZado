@@ -1,0 +1,18 @@
+# SpotiZado — dominios publicitarios de Spotify (modo ESTRICTO)
+# Endpoints de anuncios/telemetria de Spotify. NO incluye dominios de contenido
+# (open.spotify.com, api-partner, spclient, CDN de audio), por eso no rompen la
+# reproduccion en si mismos. El bloqueo de estos hosts puede dejar anuncios
+# 'mudos' en vez de eliminarlos: para eso existe la capa AdGuard del reproductor.
+# Reglas: 11
+
+adeventtracker.spotify.com
+ads-akp.spotify.com
+ads-fa.scdn.co
+ads-fa.spotify.com
+adstudio-assets.scdn.co
+adstudio.spotify.com
+aet.spotify.com
+audio-ads.spotify.com
+mp3ad.scdn.co
+pixel-static.spotify.com
+pixel.spotify.com

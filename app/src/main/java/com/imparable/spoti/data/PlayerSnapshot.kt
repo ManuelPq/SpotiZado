@@ -75,7 +75,11 @@ data class PlayerHealth(
     /** Densidad de pixeles del dispositivo. */
     val devicePixelRatio: Double = 0.0,
     /** Primer texto visible de la pagina: revela mensajes de error de Spotify. */
-    val pageText: String? = null
+    val pageText: String? = null,
+    /** User-Agent que ve Spotify: revela que reproductor nos esta sirviendo. */
+    val userAgent: String? = null,
+    /** Estado del medio: «sin medio», o la posicion y el readyState. */
+    val mediaState: String? = null
 )
 
 /** Estadísticas del bloqueo, para el panel de diagnóstico. */

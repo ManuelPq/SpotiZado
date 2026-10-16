@@ -1,5 +1,21 @@
 # Historial de versiones — SpotiZado
 
+## 0.3.2 — 2026-10-16
+**Ajuste «Modo del reproductor» conectado.** Defecto: `guiMode` (Movil/Escritorio) solo
+se usaba en la interfaz; en el codigo habia `desktop = true` y `desktopMode = true`
+hardcodeados en tres sitios, asi que elegir «Movil» no cambiaba nada. Ahora manda el
+ajuste. El CSS de escritorio (`40_layout.js`) solo se inyecta en modo escritorio.
+
+**Datos del usuario que motivan el experimento:** cuenta **gratuita**, y el
+reproductor web **si suena** en Chrome del telefono. Descartado DRM (`widevine OK`),
+cuenta y red. El README de SpotiDuck advierte de «errores al cargar la reproduccion
+en WebViews moviles» con cuentas gratuitas. Por eso el modo por defecto pasa a ser
+**Movil**: el reproductor web movil es el que Spotify disena para navegadores de
+telefono.
+
+Sonda: `ua` (lo que Spotify ve como navegador), `audio` (posicion/readyState/pausa o
+«sin medio»), `clientW`, `metaVp`, `dpr` y `bodyText`.
+
 ## 0.3.1 — 2026-10-16
 **El arreglo del «no se usa el 100 % de pantalla».** Medido en el dispositivo:
 `Vista / documento = 1920x978 / 420`. `innerWidth` valia 1920 (nuestro spoof) pero el

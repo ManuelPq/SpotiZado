@@ -105,7 +105,9 @@ private fun PlayerWebViewSlot() {
         factory = { ctx ->
             val bridge = PlayerHost.bridge ?: buildBridge(ctx)
             val existing = PlayerHost.webView
-            val view = existing ?: PlayerWebViewFactory.create(ctx, bridge, desktopMode = true)
+            val desktopWanted = com.imparable.spoti.injection.InjectionComposer
+                .settings.guiMode == com.imparable.spoti.data.GuiMode.DESKTOP
+            val view = existing ?: PlayerWebViewFactory.create(ctx, bridge, desktopMode = desktopWanted)
             if (view.parent != null) {
                 (view.parent as? ViewGroup)?.removeView(view)
             }
@@ -127,7 +129,8 @@ private fun PlayerWebViewSlot() {
                 }
                 PlayerWebViewFactory.applyProfile(
                     view,
-                    desktop = target.startsWith(com.imparable.spoti.web.PlayerWebViewClient.PREFIX_PLAYER)
+                    desktop = desktopWanted &&
+                        target.startsWith(com.imparable.spoti.web.PlayerWebViewClient.PREFIX_PLAYER)
                 )
                 view.loadUrl(target)
             }

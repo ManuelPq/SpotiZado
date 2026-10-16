@@ -542,6 +542,22 @@ private fun PlayerNotice(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Text(
+                text = "medio=" + (state.health.mediaState ?: "-"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            state.health.userAgent?.let { ua ->
+                Text(
+                    text = "ua=" + ua,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             state.health.pageText?.let { t ->
                 Text(
                     text = t,
@@ -721,6 +737,7 @@ private fun PlayerStrip(
                     append(" | ready=").append(if (state.health.ready) "si" else "no")
                     append(" | play=").append(if (state.health.playButtonPresent) "si" else "no")
                     append(" | audio=").append(state.health.mediaElements)
+                    append(" | modo=").append(state.settings.guiMode.name.lowercase())
                     append(" | ads=").append(state.settings.adBlockMode.name.lowercase())
                     append("/").append(state.settings.adGuardMode.name.lowercase())
                 },

@@ -83,6 +83,23 @@ class PlayerWebViewClient(
     @Volatile
     private var loadedWithDesktop: Boolean = false
 
+    /**
+     * Perfil que pide el usuario para el reproductor.
+     *
+     * DEFECTO CORREGIDO: el ajuste «Modo del reproductor: Movil/Escritorio» solo
+     * se usaba en la interfaz. Aqui estaba `desktop = true` fijo, asi que elegir
+     * «Movil» no cambiaba nada. Ahora manda el ajuste.
+     *
+     * Con cuenta gratuita el modo Movil es el experimento que toca: el
+     * reproductor web movil es el que Spotify disena para navegadores de
+     * telefono, y es donde el audio tiene alguna posibilidad de arrancar.
+     */
+    private val desktopWanted: Boolean
+        get() = (
+            com.imparable.spoti.injection.InjectionComposer.settings.guiMode ==
+                com.imparable.spoti.data.GuiMode.DESKTOP
+            )
+
     /** Cambia el perfil solo si hace falta y deja constancia. */
     private fun switchProfile(view: WebView, desktop: Boolean) {
         if (profileIsDesktop == desktop) return
@@ -99,14 +116,14 @@ class PlayerWebViewClient(
         // Lo que importa es con qué perfil se pidió ESTA carga, no con cuál se
         // quedará el WebView a partir de ahora.
         loadedWithDesktop = profileIsDesktop == true
-        switchProfile(view, desktop = isPlayer)
+        switchProfile(view, desktop = isPlayer && desktopWanted)
 
         // Spoof de escritorio: solo en el reproductor. Es el script que hace que
         // Spotify sirva el reproductor de ESCRITORIO dentro del WebView, que es
         // el que expone los selectores que usan el control y el AdGuard.
         // En el login se aplica lo contrario (perfil móvil) porque esa página es
         // responsive y necesita el ancho real del teléfono.
-        if (isPlayer) {
+        if (isPlayer && desktopWanted) {
             view.evaluateJavascript(bridge.composer.buildEnvSpoofScript(), null)
         }
     }
@@ -132,7 +149,10 @@ class PlayerWebViewClient(
             // iniciar sesión), esta carga trajo el reproductor MÓVIL. Se recarga
             // una vez con perfil de escritorio, que es el que expone los selectores
             // que usan el control y el AdGuard.
-            url.startsWith(PREFIX_PLAYER) && !loadedWithDesktop -> {
+            // Solo se recarga si el usuario QUIERE escritorio. Sin este
+            // `desktopWanted` habria bucle infinito: en modo movil el perfil
+            // nunca es «escritorio» y la recarga se dispararia sin fin.
+            url.startsWith(PREFIX_PLAYER) && desktopWanted && !loadedWithDesktop -> {
                 switchProfile(view, desktop = true)
                 view.post { view.reload() }
             }

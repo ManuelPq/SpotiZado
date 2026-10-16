@@ -245,7 +245,9 @@ class PlayerBridge(
                 layoutWidth = o.optInt("clientW"),
                 metaViewport = o.optString("metaVp", null),
                 devicePixelRatio = o.optDouble("dpr", 0.0),
-                pageText = o.optString("bodyText", null)
+                pageText = o.optString("bodyText", null),
+                userAgent = o.optString("ua", null),
+                mediaState = o.optString("audio", null)
             )
         }.getOrElse {
             Log.w(TAG, "sonda ilegible", it)

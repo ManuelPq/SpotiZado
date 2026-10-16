@@ -41,6 +41,17 @@ JSON.stringify({
   // Lo primero que dice la pagina: si Spotify muestra un error de reproduccion
   // ('Algo salio mal', 'Can\'t play this right now'), aqui se vera.
   bodyText: ((document.body && document.body.innerText) || '').replace(/\s+/g, ' ').slice(0, 180),
+  // Lo que Spotify VE como navegador. Sin esto no se puede saber si nos esta
+  // sirviendo el reproductor movil o el de escritorio.
+  ua: (navigator.userAgent || '').slice(0, 125),
+  // Estado del medio: si no hay <audio>, o su currentTime no avanza, el stream
+  // no ha arrancado (0:00 clavado en la interfaz).
+  audio: (function () {
+    var a = document.querySelector('audio,video');
+    if (!a) return 'sin medio';
+    return (Math.round((a.currentTime || 0) * 10) / 10) + 's rs' + (a.readyState || 0)
+      + (a.paused ? ' pausado' : ' sonando') + (a.src ? '' : ' sin-src');
+  })(),
   vw: window.innerWidth,
   vh: window.innerHeight,
   scrollW: (document.documentElement && document.documentElement.scrollWidth) || 0,

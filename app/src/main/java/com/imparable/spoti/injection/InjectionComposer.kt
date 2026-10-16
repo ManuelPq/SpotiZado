@@ -83,8 +83,13 @@ class InjectionComposer(private val context: Context) {
         append(load(THEME))
         append(applyThemeCall())
 
-        append(load(LAYOUT))
-        append("window.spotiStartLayout(${settings.autoCloseNowPlaying});")
+        // El CSS que adapta el reproductor de ESCRITORIO a pantalla de movil no
+        // tiene sentido si el usuario pide el reproductor movil: solo se inyecta
+        // en modo escritorio.
+        if (settings.guiMode == com.imparable.spoti.data.GuiMode.DESKTOP) {
+            append(load(LAYOUT))
+            append("window.spotiStartLayout(${settings.autoCloseNowPlaying});")
+        }
 
         append("window.spotiStartStateLoop(${if (settings.batterySaver) 4000 else 2000});")
     }

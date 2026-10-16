@@ -348,7 +348,9 @@ private fun DiagnosticsContent(state: PlayerViewModel.UiState, viewModel: Player
             "Vista / documento",
             "${state.health.viewportWidth}×${state.health.viewportHeight} / ${state.health.scrollWidth}"
         )
-        DiagnosticRow("Escala", state.health.pageScale.toString())
+        DiagnosticRow("Escala de maquetación", state.health.pageScale.toString())
+        DiagnosticRow("Escala VISUAL", state.health.visualScale.toString())
+        DiagnosticRow("Widevine (DRM)", state.health.drmStatus ?: "—")
         DiagnosticRow("Botón de login", if (state.health.submitButton) "sí" else "no")
         DiagnosticRow("Texto visible", state.health.bodyLength.toString())
         DiagnosticRow("device_id", state.health.device ?: "—")

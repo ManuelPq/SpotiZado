@@ -51,7 +51,8 @@
     neutralized: 0,
     savedVolume: null,
     lastTrack: null,
-    skipAttempts: 0
+    skipAttempts: 0,
+    confirmTicks: 0
   };
   window.SpotiAdGuardState = S;
 
@@ -74,18 +75,15 @@
       }
     } catch (e) { /* ignore */ }
 
-    // Web Audio: Spotify usa un GainNode global en algunas rutas.
+    // Web Audio.
+    //
+    // OJO: aqui se SUSTITUIA window.AudioContext por una funcion propia. Eso es
+    // invasivo y puede romper el arranque del audio de Spotify (el reproductor
+    // comprueba el constructor y la cadena de prototipos). Se elimino: ahora
+    // solo se envuelve `createGain` en una instancia YA existente, sin tocar el
+    // constructor global.
     try {
-      if (!window.__spotiGainPatched && window.AudioContext) {
-        var OrigCtx = window.AudioContext;
-        window.AudioContext = function () {
-          var ctx = new OrigCtx();
-          window.__spotiAudioCtx = ctx;
-          return ctx;
-        };
-        window.__spotiGainPatched = true;
-      }
-      var ctx = window.__spotiAudioCtx;
+      var ctx = window.__spotiAudioCtx || null;
       if (ctx && !ctx.__spotiGainWrapped) {
         var makeGain = ctx.createGain.bind(ctx);
         ctx.createGain = function () {
@@ -126,9 +124,15 @@
   }
 
   /**
-   * Senal fuerte: durante un anuncio el reproductor suele ocultar el enlace de
-   * pista del contexto. Es la unica senal que se usa para ABRIR el estado de
-   * anuncio (evita falsos positivos); el DOM solo confirma.
+   * Pista sin texto.
+   *
+   * ESTE ERA EL FALLO. `trackMissing()` se usaba como senal para ABRIR el estado
+   * de anuncio, y devuelve true siempre que el enlace de pista esta vacio — algo
+   * que ocurre de forma NORMAL mientras una cancion carga o al cambiar de pista.
+   * Resultado: un falso anuncio -> `muteAll(true)` -> musica muda.
+   *
+   * Ahora esta senal NO silencia por si sola: solo cuenta como indicio cuando ya
+   * se esta dentro de un anuncio confirmado.
    */
   function trackMissing() {
     var link = document.querySelector(SEL.trackLink);
@@ -136,6 +140,9 @@
     var t = (link.textContent || '').trim();
     return t.length === 0;
   }
+
+  /** Ticks consecutivos con senal de anuncio en el DOM (evita transitorios). */
+  var AD_CONFIRM_TICKS = 2;
 
   /* ------------------------------------------------------------------ */
   /* Neutralizacion                                                      */
@@ -165,7 +172,9 @@
     S.inAd = true;
     S.since = Date.now();
     S.skipAttempts = 0;
-    if (CFG.mode !== 'skip') muteAll(true);
+    // El silencio solo se aplica en modo silenciar; en modo saltar se intenta
+    // saltar sin tocar el audio (asi un fallo de deteccion no deja la musica muda).
+    if (CFG.mode === 'silent' || CFG.mode === 'both') muteAll(true);
     trySkip();
     window.SpotiState && (window.SpotiState.adPlaying = true);
     spotiNotify('adguard', {
@@ -198,6 +207,14 @@
       leaveAd(true);
       return;
     }
+    // Watchdog: si llevamos un rato "en anuncio" pero el DOM ya no muestra
+    // ninguna senal de anuncio, fue un falso positivo. Se sale y se restaura el
+    // audio SIEMPRE. Esta es la red de seguridad contra "musica muda para siempre".
+    if (Date.now() - S.since > 8000 && !domSaysAd()) {
+      leaveAd(true);
+      spotiNotify('adguard', { phase: 'false-positive-cleared' });
+      return;
+    }
     if (Date.now() - S.since > (CFG.maxAdMs || 40000)) {
       leaveAd(false);
       spotiNotify('adguard', { phase: 'stuck' });
@@ -206,7 +223,7 @@
     }
     if (S.skipAttempts < 3) trySkip();
     // Reaplicar el silencio: el reproductor puede crear un <audio> nuevo.
-    if (CFG.mode !== 'skip') muteAll(true);
+    if (CFG.mode === 'silent' || CFG.mode === 'both') muteAll(true);
   }
 
   /* ------------------------------------------------------------------ */
@@ -220,8 +237,18 @@
     if (tickInterval) clearInterval(tickInterval);
     tickInterval = setInterval(function () {
       if (!S.inAd) {
-        var suspicious = trackMissing() || domSaysAd();
-        if (suspicious) enterAd();
+        // Solo la senal del DOM confirma un anuncio, y debe repetirse en varios
+        // ticks. La ausencia de texto en la pista NO basta: es lo que provocaba
+        // los falsos positivos que dejaban la musica muda.
+        if (domSaysAd()) {
+          S.confirmTicks++;
+          if (S.confirmTicks >= AD_CONFIRM_TICKS) {
+            S.confirmTicks = 0;
+            enterAd();
+          }
+        } else {
+          S.confirmTicks = 0;
+        }
       } else {
         guard();
       }

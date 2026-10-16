@@ -60,7 +60,14 @@ data class PlayerHealth(
     /** Ancho total del documento: si supera mucho el viewport, hay desbordamiento. */
     val scrollWidth: Int = 0,
     /** Escala aplicada al documento (screen.width / innerWidth). */
-    val pageScale: Double = 0.0
+    val pageScale: Double = 0.0,
+    /**
+     * Escala VISUAL del documento (1.0 = tamano real). Es la que explica que el
+     * contenido se vea minusculo aunque el viewport de maquetacion sea correcto.
+     */
+    val visualScale: Double = 1.0,
+    /** Soporte de Widevine (EME): sin el, el audio del reproductor no suena. */
+    val drmStatus: String? = null
 )
 
 /** Estadísticas del bloqueo, para el panel de diagnóstico. */

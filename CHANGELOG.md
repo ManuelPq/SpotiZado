@@ -1,5 +1,21 @@
 # Historial de versiones — SpotiZado
 
+## 0.2.1 — 2026-10-16
+**Escala del login.** Causa raíz: `loadWithOverviewMode = true` tambien en la pagina
+de login, lo que hacia que el WebView redujera la pagina ENTERA para encajarla. El
+formulario quedaba a ~5 % de la pantalla. Medido en el dispositivo: `vw=384`, `sw=384`
+(maquetacion correcta), pero la ESCALA VISUAL era el problema. Ahora `overview` es
+`true` solo en el reproductor. Sonda ampliada con `visualViewport.scale` y con el
+estado de **Widevine (DRM)**.
+
+**Bloqueo de anuncios, defecto propio.** `trackMissing()` abria el estado de anuncio
+cuando el texto de la pista estaba vacio, algo NORMAL mientras una cancion carga:
+falso positivo -> `muteAll(true)` -> musica muda. Ademas se sustituia
+`window.AudioContext`, lo que puede romper el arranque de audio de Spotify. Corregido:
+solo la senal del DOM confirma anuncio (2 ticks), el silencio se aplica solo en modo
+silenciar, no se toca ningun constructor global, y un watchdog a 8 s sale del estado
+y restaura el audio siempre.
+
 ## 0.2.0 — 2026-10-16
 Rebranding a **SpotiZado** + icono nuevo (verde #1ED860, adaptativo, 5 densidades).
 Línea base declarada: se adopta el método de «una versión = un cambio, ningún cambio

@@ -83,6 +83,16 @@ object PlayerWebViewFactory {
             useWideViewPort = true
             loadWithOverviewMode = true
             // Sin esto, la página de login se dibuja a 980 px y no se ve el formulario.
+            // `loadWithOverviewMode` solo en el reproductor.
+            //
+            // Es la causa de que el formulario de login quedara minusculo: con
+            // overview activo el WebView reduce la pagina ENTERA (que es alta)
+            // para encajarla en la pantalla. Medido en el dispositivo:
+            // vw=384, sw=384 (sin desbordamiento) y el formulario a ~5 % de la
+            // pantalla, con scroll. El viewport de maquetacion era correcto, asi
+            // que ninguna medida anterior podia detectarlo: lo que estaba mal era
+            // la ESCALA VISUAL. Se anade esa medida a la sonda.
+            loadWithOverviewMode = desktop
             webView.setInitialScale(if (desktop) 100 else 0)
         }
     }

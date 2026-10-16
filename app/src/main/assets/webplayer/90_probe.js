@@ -35,5 +35,36 @@ JSON.stringify({
   scrollW: (document.documentElement && document.documentElement.scrollWidth) || 0,
   scale: (window.innerWidth > 0)
     ? Math.round((window.screen.width / window.innerWidth) * 100) / 100
-    : 0
+    : 0,
+  // Escala VISUAL: es la que decide si el contenido se ve minúsculo. El
+  // viewport de maquetación puede ser correcto mientras el zoom visual es 0.3.
+  visual: (window.visualViewport && window.visualViewport.scale)
+    ? Math.round(window.visualViewport.scale * 100) / 100
+    : 1,
+  // DRM. El reproductor web de Spotify descifra el audio con Widevine (EME).
+  // Si el dispositivo no lo soporta, la música NUNCA sonará por mucho que el
+  // resto esté bien. Se comprueba una vez y se guarda.
+  drm: (function () {
+    if (window.spotiDrm !== undefined) return window.spotiDrm;
+    if (!navigator.requestMediaKeySystemAccess) {
+      window.spotiDrm = 'no soportado';
+      return window.spotiDrm;
+    }
+    window.spotiDrm = 'comprobando';
+    try {
+      navigator.requestMediaKeySystemAccess('com.widevine.alpha', [{
+        initDataTypes: ['cenc'],
+        audioCapabilities: [{
+          contentType: 'audio/mp4; codecs="mp4a.40.2"'
+        }]
+      }]).then(function () {
+        window.spotiDrm = 'widevine OK';
+      }).catch(function () {
+        window.spotiDrm = 'SIN widevine';
+      });
+    } catch (e) {
+      window.spotiDrm = 'error: ' + e.message;
+    }
+    return window.spotiDrm;
+  })()
 })

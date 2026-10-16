@@ -87,7 +87,7 @@ object PlayerWebViewFactory {
             // pagina de login activaba el modo panoramico (ancho de 980 px) y con
             // el zoom automatico reducia el formulario a una franja minuscula.
             useWideViewPort = desktop
-            loadWithOverviewMode = true
+            loadWithOverviewMode = desktop
             // Sin esto, la página de login se dibuja a 980 px y no se ve el formulario.
             // `loadWithOverviewMode` solo en el reproductor.
             //

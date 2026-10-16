@@ -1,5 +1,34 @@
 # Historial de versiones — SpotiZado
 
+## 0.4.0 — 2026-10-16 — control por la API de Connect
+**Causa raiz del player nativo muerto.** Todos los comandos de `20_control.js`
+pulsaban selectores del reproductor de ESCRITORIO
+(`button[data-testid=control-button-playpause]`, `div[data-testid=playback-progressbar]`).
+El modo que hace sonar la musica es el MOVIL, y el reproductor web movil no tiene
+esos selectores: cada orden devolvia `false` y el bucle de estado no leia nada. De ahi
+la barra nativa mostrando «Sin reproduccion» y sin respuesta al toque.
+
+**Solucion portada de Spotifuck** (y de su derivado SpotiDuck, que funciona): mandar
+las ordenes por la API de **Spotify Connect** al propio `device_id` del WebView, en
+lugar de simular clics. Es ademas el «truco» descrito por el usuario: dentro de
+Spotify, decirle que el reproductor es el WebView. Resuelve tambien el lio de los
+«dos reproductores» de la misma cuenta.
+
+Nuevo `assets/webplayer/27_connect.js`:
+- Endpoints usados: `resume`, `pause`, `next`, `skip_prev` y `/player/transfer`.
+  `playFromUri` (endpoint `play`) ya existia y se reutiliza. Para seek, repeat,
+  shuffle y favorito se mantiene el clic del DOM y se informa del fallo: inventar
+  nombres de endpoint ocultaria el problema en vez de resolverlo.
+- Cada comando intenta la API y cae al clic anterior si no hay credenciales o falla.
+- Estado con **fuentes genericas**, sin depender del DOM de escritorio:
+  `navigator.mediaSession.metadata` (pista, artista, album, caratula),
+  el elemento `<audio>` real (posicion y duracion exactas), `document.title` y
+  heuristica de `aria-label` para el estado de reproduccion.
+- `transferHere()` mueve la reproduccion a nuestro reproductor.
+
+Ademas: `loadWithOverviewMode` pasa a ser condicional (quedaba en `true` y era el
+ultimo reescalado activo en el login).
+
 ## 0.3.2 — 2026-10-16
 **Ajuste «Modo del reproductor» conectado.** Defecto: `guiMode` (Movil/Escritorio) solo
 se usaba en la interfaz; en el codigo habia `desktop = true` y `desktopMode = true`

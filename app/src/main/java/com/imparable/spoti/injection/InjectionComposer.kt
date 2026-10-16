@@ -26,6 +26,7 @@ class InjectionComposer(private val context: Context) {
         const val HOST_BRIDGE = DIR + "05_host_bridge.js"
         const val STATE = DIR + "10_state.js"
         const val CONTROL = DIR + "20_control.js"
+        const val CONNECT = DIR + "27_connect.js"
         const val SEARCH = DIR + "25_search.js"
         const val QUEUE = DIR + "26_queue.js"
         const val AD_GUARD = DIR + "30_adguard.js"
@@ -52,6 +53,7 @@ class InjectionComposer(private val context: Context) {
         append(load(HOST_BRIDGE))
         append(load(STATE))
         append(load(CONTROL))
+        append(load(CONNECT))
         append(load(SEARCH))
         append(load(QUEUE))
         append(load(THEME))
@@ -66,6 +68,7 @@ class InjectionComposer(private val context: Context) {
         append(load(HOST_BRIDGE))
         append(load(STATE))
         append(load(CONTROL))
+        append(load(CONNECT))
         append(load(SEARCH))
         append(load(QUEUE))
 

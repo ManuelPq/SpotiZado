@@ -654,3 +654,96 @@ private fun NowPlayingBar(state: PlayerViewModel.UiState, viewModel: PlayerViewM
         }
     }
 }
+
+
+/**
+ * Banda de estado de **una sola linea**, plegable.
+ *
+ * Sustituye a la tarjeta de aviso, que en las capturas del dispositivo ocupaba
+ * entre el 35 % y el 40 % del alto de la pantalla. Con un reproductor web cada
+ * pixel de alto es un pixel que el usuario no puede usar: la tarjeta se comia la
+ * pantalla que el reproductor necesita.
+ *
+ * Concentra aqui las medidas que deciden un diagnostico, para que una simple
+ * captura baste: version, modo seguro, DRM, si el reproductor esta listo, si
+ * existe el boton de reproduccion, el estado del viewport y, en el login, si el
+ * formulario se ve.
+ */
+@Composable
+private fun PlayerStrip(
+    state: PlayerViewModel.UiState,
+    viewModel: PlayerViewModel,
+    onOpenDiagnostics: () -> Unit
+) {
+    val notice = noticeFor(state)
+    var expanded by remember { mutableStateOf(false) }
+    val safe = com.imparable.spoti.adblock.AdBlocker.SAFE_MODE
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = (if (state.playerOperational) "\u25cf " else "\u25cb ")
+                    + (notice?.title ?: "Reproductor operativo"),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(if (expanded) "Ocultar" else "Datos", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+
+        if (expanded) {
+            Text(
+                text = buildString {
+                    append("v").append(BuildConfig.VERSION_NAME)
+                    append(" | seguro=").append(if (safe) "SI" else "no")
+                    append(" | drm=").append(state.health.drmStatus ?: "-")
+                    append(" | ready=").append(if (state.health.ready) "si" else "no")
+                    append(" | play=").append(if (state.health.playButtonPresent) "si" else "no")
+                    append(" | ads=").append(state.settings.adBlockMode.name.lowercase())
+                    append("/").append(state.settings.adGuardMode.name.lowercase())
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = buildString {
+                    append("campos=").append(state.health.inputCount)
+                    append(" pwd=").append(if (state.health.passwordField) "si" else "no")
+                    append(" vis=").append(if (state.health.passwordVisible) "si" else "no")
+                    append(" vw=").append(state.health.viewportWidth)
+                    append(" sw=").append(state.health.scrollWidth)
+                    append(" zoom=").append(state.health.visualScale)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            state.health.url?.let { url ->
+                Text(
+                    text = url.take(78),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (notice?.action == NoticeAction.LOGIN) {
+                    TextButton(onClick = { viewModel.openLogin() }) { Text("Abrir login") }
+                }
+                TextButton(onClick = { viewModel.reloadPlayer() }) { Text("Recargar") }
+                TextButton(onClick = onOpenDiagnostics) { Text("Diagnostico") }
+            }
+            if (!safe) {
+                Text(
+                    text = "Aviso: modo seguro desactivado; el bloqueo puede impedir la reproduccion.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}

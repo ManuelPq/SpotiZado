@@ -1,5 +1,19 @@
 # Historial de versiones — SpotiZado
 
+## 0.3.0 — 2026-10-16 — build de diagnostico
+- **Banda de estado de una linea** en lugar de la tarjeta de aviso, que en las
+  capturas del dispositivo ocupaba el 35-40 % del alto: nuestra propia interfaz le
+  robaba la pantalla al reproductor. Plegada ocupa una linea; con «Datos» muestra
+  version, modo seguro, DRM, ready, play, modos de bloqueo, campos, pwd, vis, vw,
+  sw y zoom.
+- **Viewport movil normal en el login**: `useWideViewPort` era `true` siempre, lo
+  que en una pagina movil activaba el modo panoramico (980 px) y reducia el
+  formulario a una franja. Ahora `true` solo en el reproductor.
+- **Modo seguro** (`AdBlocker.SAFE_MODE = true`): filtrado de red y neutralizacion
+  desactivados para aislar si alguna capa propia impide la reproduccion. El README
+  de SpotiDuck advierte de que un filtro agresivo bloquea endpoints y las pistas no
+  suenan; nuestra capa 1 iba en STRICT con 1.316 reglas.
+
 ## 0.2.1 — 2026-10-16
 **Escala del login.** Causa raíz: `loadWithOverviewMode = true` tambien en la pagina
 de login, lo que hacia que el WebView redujera la pagina ENTERA para encajarla. El

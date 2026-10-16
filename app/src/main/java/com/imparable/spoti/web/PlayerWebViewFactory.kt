@@ -80,7 +80,13 @@ object PlayerWebViewFactory {
     fun applyProfile(webView: WebView, desktop: Boolean) {
         with(webView.settings) {
             userAgentString = buildUserAgent(webView.context, desktop)
-            useWideViewPort = true
+            // En perfil movil se usa el comportamiento normal del WebView para
+            // una pagina movil: `useWideViewPort=false` deja que la pagina use el
+            // ancho del dispositivo tal cual, sin modo panoramico ni escalas
+            // impuestas. Antes `useWideViewPort` era `true` SIEMPRE, lo que en la
+            // pagina de login activaba el modo panoramico (ancho de 980 px) y con
+            // el zoom automatico reducia el formulario a una franja minuscula.
+            useWideViewPort = desktop
             loadWithOverviewMode = true
             // Sin esto, la página de login se dibuja a 980 px y no se ve el formulario.
             // `loadWithOverviewMode` solo en el reproductor.

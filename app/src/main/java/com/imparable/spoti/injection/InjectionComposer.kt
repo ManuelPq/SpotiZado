@@ -71,7 +71,7 @@ class InjectionComposer(private val context: Context) {
 
         // Capa 3: neutralizador de anuncios (solo si está activo).
         val guard = settings.adGuardMode
-        if (guard != AdGuardMode.OFF) {
+        if (guard != AdGuardMode.OFF && !com.imparable.spoti.adblock.AdBlocker.SAFE_MODE) {
             append(load(AD_GUARD))
             append(
                 "window.SpotiAdGuardConfig={mode:${quote(modeName(guard))},"

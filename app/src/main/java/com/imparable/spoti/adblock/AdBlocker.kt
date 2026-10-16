@@ -35,6 +35,22 @@ class AdBlocker(private val context: Context) {
          * Una lista más corta suele indicar descarga corrupta o manipulada.
          */
         const val MIN_REMOTE_RULES = 100
+
+        /**
+         * MODO SEGURO (build de diagnostico).
+         *
+         * Desactiva por completo el filtrado de red y la neutralizacion, para
+         * poder aislar si alguna de NUESTRAS capas impide la reproduccion.
+         *
+         * No es una precaucion teorica: el README del proyecto hermano SpotiDuck
+         * advierte literalmente de que «cargar listas de filtros agresivas puede
+         * bloquear endpoints esenciales del servidor, impidiendo que suenen las
+         * pistas». Nuestra capa 1 va en modo STRICT con 1.316 reglas.
+         *
+         * Con esto, la app queda como un contenedor puro: si asi suena, el
+         * culpable era nuestra capa; si no suena, es el WebView o el DRM.
+         */
+        const val SAFE_MODE = true
     }
 
     private val exactRules = HashSet<String>(4096)
@@ -116,6 +132,7 @@ class AdBlocker(private val context: Context) {
 
     /** ¿Se debe bloquear este host? */
     fun shouldBlock(host: String?): Boolean {
+        if (SAFE_MODE) return false
         if (host.isNullOrEmpty()) return false
         if (mode == AdBlockMode.OFF) return false
 

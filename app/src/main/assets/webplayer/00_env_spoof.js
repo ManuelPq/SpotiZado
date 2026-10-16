@@ -6,12 +6,26 @@
  */
 (function () {
   var g = function (obj, prop, value) { obj.__defineGetter__(prop, function () { return value; }); };
-  // TAMANO: no se falsea. Antes se declaraban 1920x1080 aqui, asi que el JS de
-  // Spotify creia tener una pantalla de escritorio mientras el CSS se maquetaba
-  // al ancho real (384 px). Esa contradiccion obligaba a forzar el meta viewport
-  // para cuadrarla y acababa sacando la interfaz fuera de la pantalla.
+  // TAMANO: se declara 1920x1080, como en la 1.0.2.
+  //
+  // En la 1.0.3 lo quite como "limpieza" al arreglar el reproductor, y la pagina
+  // de login se quedo EN NEGRO: el formulario seguia en la pagina (campos=2,
+  // pwd=si) pero no se pintaba nada. Fue un cambio no medido, metido de propina
+  // en una version cuyo objetivo era otro, y el precio fue perder lo que
+  // funcionaba. Vuelve tal cual estaba.
+  //
+  // Lo que SI se queda fuera es el forzado del meta viewport a 1920: eso era lo
+  // que sacaba la interfaz de la pantalla, y ahora se fija a `device-width`.
+  g(window.screen, 'width', 1920);
+  g(window.screen, 'height', 1080);
+  g(window.screen, 'availWidth', 1920);
+  g(window.screen, 'availHeight', 1040);
   g(window.screen, 'colorDepth', 24);
   g(window.screen, 'pixelDepth', 24);
+  g(window, 'innerWidth', 1920);
+  g(window, 'innerHeight', 978);
+  g(window, 'outerWidth', 1920);
+  g(window, 'outerHeight', 1040);
   g(window.navigator, 'vendor', 'Google Inc.');
   g(window.navigator, 'productSub', '20030107');
   g(window.navigator, 'platform', 'Win32');

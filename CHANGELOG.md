@@ -1,5 +1,21 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.4]
+
+- **Revertido un cambio mio no medido**: en la 1.0.3 quite el tamano declarado
+  (1920x1080) "de limpieza" mientras arreglaba el reproductor, y la pagina de login
+  se quedo en negro con el formulario dentro (`campos=2`, `pwd=si`). Vuelve tal cual
+  estaba en la 1.0.2. El forzado del meta viewport a 1920 NO vuelve: eso si era el
+  fallo, y sigue fijado a `device-width`.
+
+- **El formulario de login se coloca en pantalla en el acto**: se elimina el scroll
+  suave (que dejaba el WebView a medio camino, mostrando una zona vacia) y se calcula
+  la posicion a un tercio desde arriba, sin animacion.
+
+- **La linea de sonda ya no se corta**: pasa a dos lineas e incluye el zoom, que es lo
+  que permitia diagnosticar el desbordamiento.
+- **"Recargar" siempre disponible** en el aviso de login.
+
 ## [1.0.3]
 
 - **La interfaz vuelve a caber en la pantalla.** La 1.0.2 medía

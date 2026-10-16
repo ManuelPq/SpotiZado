@@ -84,26 +84,48 @@
    * paso. Se reintenta unas cuantas veces, no en bucle abierto.
    */
   function ensurePasswordVisible() {
+    // Posicion de partida limpia. Con `behavior:'smooth'` el WebView puede
+    // quedarse a medio camino y dejar a la vista una zona vacia: eso era la
+    // pantalla negra. Aqui todo se mueve en el acto.
+    scrollDoc(0);
+
     var tries = 0;
     var timer = setInterval(function () {
       tries++;
-      var p = document.querySelector('input[type=password]');
-      if (p) {
-        var r = p.getBoundingClientRect();
-        var inView = r.width >= 4 && r.height >= 4 &&
-          r.top < window.innerHeight && r.bottom > 0 &&
-          r.left < window.innerWidth && r.right > 0;
-        if (!inView) {
-          try { p.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
-          catch (e) { p.scrollIntoView(); }
-          spotiNotify('login', { phase: 'scrolled-to-password' });
-        } else {
+      var target = document.querySelector('input[type=password]')
+        || document.querySelector('input[type=email], input[name=username], input[type=text]');
+      if (target) {
+        var r = target.getBoundingClientRect();
+        var h = window.innerHeight || 640;
+        var fullyInView = r.width >= 4 && r.top >= 0 && r.bottom <= h;
+        var outOfView = r.width >= 4 && (r.bottom < 0 || r.top > h);
+        if (outOfView) {
+          // Se coloca a un tercio desde arriba, sin animacion.
+          scrollDoc(Math.max(0, currentScroll() + r.top - Math.round(h / 3)));
+          spotiNotify('login', { phase: 'scrolled-to-form' });
+        } else if (fullyInView) {
           clearInterval(timer);
           return;
         }
       }
-      if (tries > 6) clearInterval(timer);
-    }, 1200);
+      if (tries > 8) clearInterval(timer);
+    }, 900);
+  }
+
+  /** Desplazamiento del documento, sea cual sea el elemento que scrollea. */
+  function currentScroll() {
+    var se = document.scrollingElement || document.documentElement;
+    return se ? se.scrollTop : (window.pageYOffset || 0);
+  }
+
+  /** Coloca el documento en la posicion `y`, sin animacion y por todas las vias. */
+  function scrollDoc(y) {
+    try {
+      var se = document.scrollingElement || document.documentElement;
+      if (se) se.scrollTop = y;
+      if (document.body) document.body.scrollTop = y;
+      window.scrollTo(0, y);
+    } catch (e) { /* la pagina no permite desplazarse: se sigue igual */ }
   }
 
   function findEmailEntry() {

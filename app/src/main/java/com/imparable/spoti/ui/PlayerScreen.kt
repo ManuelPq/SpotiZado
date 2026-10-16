@@ -540,10 +540,13 @@ private fun PlayerNotice(
                         append(" · visible=").append(if (state.health.passwordVisible) "sí" else "no")
                         append(" · vw=").append(state.health.viewportWidth)
                         append(" · sw=").append(state.health.scrollWidth)
+                        append(" · zoom=").append(state.health.visualScale)
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    // Dos lineas: en una sola, `visible` y `vw/sw` — los datos que
+                    // deciden el diagnostico — quedaban cortados por el boton.
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
@@ -604,13 +607,24 @@ if (expanded) {
             ) {
                 when (notice.action) {
                     NoticeAction.LOGIN -> {
-                        Button(onClick = { viewModel.openLogin() }) {
-                            Text("Abrir login con email")
+                        // Tres acciones no caben en una linea de 384 dp: se reparten
+                        // en dos, y asi "Recargar" esta siempre a mano si la pagina
+                        // se queda en blanco.
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Button(onClick = { viewModel.openLogin() }) {
+                                Text("Abrir login con email")
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                AssistChip(
+                                    onClick = { viewModel.reloadPlayer() },
+                                    label = { Text("Recargar") }
+                                )
+                                AssistChip(
+                                    onClick = { viewModel.openLoginInBrowser() },
+                                    label = { Text("En el navegador") }
+                                )
+                            }
                         }
-                        AssistChip(
-                            onClick = { viewModel.openLoginInBrowser() },
-                            label = { Text("Probar en el navegador") }
-                        )
                     }
 
                     NoticeAction.DIAGNOSTICS -> {

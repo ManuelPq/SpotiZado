@@ -146,6 +146,14 @@ fun SettingsContent(state: PlayerViewModel.UiState, viewModel: PlayerViewModel) 
                 "Cambia el ajuste y vuelve a abrir el reproductor."
         , s.cleanMode) { viewModel.setCleanMode(it) }
 
+        Spacer(Modifier.height(8.dp))
+        SwitchRow(
+            "Reparar formulario de login (experimental)",
+            "Fuerza opacidad, visibilidad y recorte en toda la cadena de ancestros del " +
+                "formulario y pinta el resultado en pantalla. Para cuando el formulario está " +
+                "en la página pero no se ve. Cambia el ajuste y vuelve a abrir el reproductor."
+        , s.loginRepair) { viewModel.setLoginRepair(it) }
+
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
 
         Text("Lista de bloqueo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

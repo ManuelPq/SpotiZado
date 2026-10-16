@@ -134,6 +134,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     fun setCalibration(value: Boolean) = viewModelScope.launch { graph.settings.setCalibration(value) }
 
     fun setCleanMode(value: Boolean) = viewModelScope.launch { graph.settings.setCleanMode(value) }
+
+    fun setLoginRepair(value: Boolean) = viewModelScope.launch { graph.settings.setLoginRepair(value) }
     fun setGuiMode(mode: GuiMode) = viewModelScope.launch { graph.settings.setGuiMode(mode) }
 
     fun setShowNativePlayerBar(value: Boolean) =

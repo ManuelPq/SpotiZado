@@ -1,5 +1,26 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.8]
+
+- **Reparar formulario de login** (Ajustes → Diagnóstico, experimental, apagada por defecto).
+  La calibración de la 1.0.7 dio una cadena de estilos IMPECABLE:
+  `input(vis=visible op=1 disp=block) < div < div < form`, con el campo en
+  `left=24 top=274 w=336 h=52 OK en vista`, y sin embargo no se pinta nada.
+
+  Eso solo lo produce algo por ENCIMA de `<form>` en el árbol, y la cadena medida
+  llegaba justo hasta `form`: `opacity` no se hereda, así que un ancestro con
+  `opacity:0` deja al hijo con `op=1`; un `overflow:hidden` con altura 0 recorta el
+  subárbol mientras el rect del campo sigue siendo correcto; `clip-path` o `transform`
+  lo apartan. Queda una tercera vía: texto oscuro sobre fondo oscuro.
+
+  El script **mide la cadena completa** hasta `<html>` (opacidad, visibilidad,
+  desbordamiento, altura, transform, filter), **repara** forzando esos valores en toda
+  la cadena, y **vuelve a medir** después. Las dos medidas se pintan en pantalla, de modo
+  que una sola captura dice si el culpable era un ancestro oculto o si hay que buscar por
+  otro lado. Además el fondo del visor pasa a magenta en esa página: si la zona se vuelve
+  magenta, la página no pinta nada; si sigue oscura, pinta y el contenido falta por otra
+  razón.
+
 ## [1.0.7]
 
 - **Modo limpio (sin inyección)** en Ajustes → Diagnóstico. Con él activo la app no

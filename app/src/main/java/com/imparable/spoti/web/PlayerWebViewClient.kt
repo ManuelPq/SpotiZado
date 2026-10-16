@@ -160,6 +160,15 @@ class PlayerWebViewClient(
                 // formulario ya está en el DOM. El spoof de escritorio NO se aplica
                 // aquí (rompería el maquetado), solo la ayuda de login.
                 view.evaluateJavascript(bridge.composer.buildLoginScript(), null)
+
+                // Reparacion experimental: cuando el formulario esta en la pagina
+                // pero no se pinta. Solo si el usuario la activa.
+                if (com.imparable.spoti.injection.InjectionComposer.settings.loginRepair) {
+                    // El fondo magenta distingue "la pagina no pinta" de "la pagina
+                    // pinta y el contenido no": la calibracion no llega aqui.
+                    view.setBackgroundColor(0xFFFF00FF.toInt())
+                    view.evaluateJavascript(bridge.composer.buildRepairScript(), null)
+                }
             }
 
             // Reproductor: si venimos de una página con perfil móvil (p. ej. tras

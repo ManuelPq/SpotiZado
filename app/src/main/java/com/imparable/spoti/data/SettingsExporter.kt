@@ -29,6 +29,7 @@ data class SettingsExport(
 data class SettingsDto(
     val serviceEnabled: Boolean = true,
     val loggedIn: Boolean = false,
+    val calibration: Boolean = false,
     val adBlockMode: String = "STRICT",
     val adGuardMode: String = "SILENT_AND_SKIP",
     val blockListAutoUpdate: Boolean = true,
@@ -58,6 +59,7 @@ object SettingsCodec {
     fun toDto(settings: Settings) = SettingsDto(
         serviceEnabled = settings.serviceEnabled,
         loggedIn = settings.loggedIn,
+        calibration = settings.calibration,
         adBlockMode = settings.adBlockMode.name,
         adGuardMode = settings.adGuardMode.name,
         blockListAutoUpdate = settings.blockListAutoUpdate,
@@ -83,6 +85,7 @@ object SettingsCodec {
     fun toSettings(dto: SettingsDto) = Settings(
         serviceEnabled = dto.serviceEnabled,
         loggedIn = dto.loggedIn,
+        calibration = dto.calibration,
         adBlockMode = dto.adBlockMode.toEnum(AdBlockMode.STRICT),
         adGuardMode = dto.adGuardMode.toEnum(AdGuardMode.SILENT_AND_SKIP),
         blockListAutoUpdate = dto.blockListAutoUpdate,

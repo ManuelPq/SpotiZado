@@ -132,6 +132,21 @@ class PlayerWebViewClient(
         super.onPageFinished(view, url)
         currentUrl = url
 
+        // CAPA DE CALIBRACION (herramienta de diagnostico, apagada por defecto).
+        //
+        // Se inyecta en TODAS las paginas, login incluido: el objetivo es medir, y
+        // la pagina que hay que medir es justo esa. El fondo del visor pasa a
+        // magenta: si la zona que se veia "negra" se vuelve magenta, el WebView no
+        // esta pintando nada de la pagina; si sigue oscura, la pagina si pinta y el
+        // contenido esta en otro sitio o tapado. Es la prueba que separa las dos
+        // posibilidades de un vistazo.
+        if (com.imparable.spoti.injection.InjectionComposer.settings.calibration) {
+            view.setBackgroundColor(0xFFFF00FF.toInt())
+            view.evaluateJavascript(bridge.composer.buildCalibScript(), null)
+        } else {
+            view.setBackgroundColor(0xFF121212.toInt())
+        }
+
         when {
             // Consentimiento GDPR de Facebook: ayuda puntual y se acaba.
             url.startsWith(FACEBOOK_CONSENT) ->

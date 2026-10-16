@@ -127,6 +127,18 @@ fun SettingsContent(state: PlayerViewModel.UiState, viewModel: PlayerViewModel) 
 
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
 
+        Text("Diagnóstico", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        SwitchRow(
+            "Capa de calibración",
+            "Pinta una rejilla de medida y un rótulo con los números reales del visor " +
+                "sobre la página, y el fondo del visor en magenta. Sirve para ver de un " +
+                "vistazo dónde está el contenido. Solo para diagnosticar: déjala apagada " +
+                "para usar la app normal. Cambia el ajuste y vuelve a abrir el reproductor."
+        , s.calibration) { viewModel.setCalibration(it) }
+
+        HorizontalDivider(Modifier.padding(vertical = 16.dp))
+
         Text("Lista de bloqueo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         SwitchRow("Actualizar automáticamente", "Descarga la lista al abrir la app.", s.blockListAutoUpdate) {
             viewModel.setBlockListAutoUpdate(it)

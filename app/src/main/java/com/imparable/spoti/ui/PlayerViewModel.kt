@@ -130,6 +130,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setAdGuardMode(mode: AdGuardMode) = viewModelScope.launch { graph.settings.setAdGuardMode(mode) }
+
+    fun setCalibration(value: Boolean) = viewModelScope.launch { graph.settings.setCalibration(value) }
     fun setGuiMode(mode: GuiMode) = viewModelScope.launch { graph.settings.setGuiMode(mode) }
 
     fun setShowNativePlayerBar(value: Boolean) =

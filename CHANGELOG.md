@@ -1,5 +1,24 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.6]
+
+- **Capa de calibración** (Ajustes → Diagnóstico), apagada por defecto. Pinta sobre la
+  página una rejilla de medida con coordenadas y un rótulo con los números reales del
+  visor: `innerW/innerH` en píxeles CSS y físicos, altura y desplazamiento del documento,
+  y la posición exacta del campo de contraseña (con aviso de si queda fuera de la vista).
+  Además el fondo del visor pasa a magenta: si la zona oscura se vuelve magenta, el
+  WebView no pinta nada de la página; si sigue oscura, la página sí pinta y el contenido
+  está en otro sitio. Es la prueba que separa las dos posibilidades de un vistazo.
+
+  Nació de una propuesta del usuario: en vez de seguir interpretando capturas a ciegas,
+  fabricar el instrumento. La capa es `pointer-events:none` y no toca el DOM de Spotify:
+  solo AÑADE una capa por encima cuando se activa a mano.
+
+- **Incluye el arreglo de la 1.0.5**, que no se entregó por separado: fuera todo el
+  código de la app en la página de login (`60_login.js` pasa a solo lectura), detección
+  nativa de sesión al llegar al reproductor, y las ventanas emergentes automáticas dejan
+  de redirigirse al mismo WebView.
+
 ## [1.0.5]
 
 - **Se retira TODO el codigo de la app de la pagina de login.** El diagnostico de

@@ -34,6 +34,7 @@ class InjectionComposer(private val context: Context) {
         const val THEME = DIR + "50_theme.js"
         const val LOGIN = DIR + "60_login.js"
         const val PROBE = DIR + "90_probe.js"
+        const val CALIB = DIR + "95_calib.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
         @Volatile
@@ -47,6 +48,9 @@ class InjectionComposer(private val context: Context) {
     fun buildLoginScript(): String = load(HOST_BRIDGE) + load(LOGIN)
 
     fun buildProbeScript(): String = load(PROBE)
+
+    /** Capa de calibracion: solo se inyecta si el ajuste esta activo. */
+    fun buildCalibScript(): String = load(CALIB)
 
     /** Script de arranque: puente, comandos y tema, antes de tener el reproductor. */
     fun buildBootScript(): String = buildString {

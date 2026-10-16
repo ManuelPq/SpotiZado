@@ -690,7 +690,7 @@ private fun PlayerStrip(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            TextButton(onClick = { expanded = !expanded }) {
+            androidx.compose.material3.TextButton(onClick = { expanded = !expanded }) {
                 Text(if (expanded) "Ocultar" else "Datos", style = MaterialTheme.typography.labelMedium)
             }
         }
@@ -732,10 +732,10 @@ private fun PlayerStrip(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (notice?.action == NoticeAction.LOGIN) {
-                    TextButton(onClick = { viewModel.openLogin() }) { Text("Abrir login") }
+                    androidx.compose.material3.TextButton(onClick = { viewModel.openLogin() }) { Text("Abrir login") }
                 }
-                TextButton(onClick = { viewModel.reloadPlayer() }) { Text("Recargar") }
-                TextButton(onClick = onOpenDiagnostics) { Text("Diagnostico") }
+                androidx.compose.material3.TextButton(onClick = { viewModel.reloadPlayer() }) { Text("Recargar") }
+                androidx.compose.material3.TextButton(onClick = onOpenDiagnostics) { Text("Diagnostico") }
             }
             if (!safe) {
                 Text(

@@ -442,7 +442,9 @@ private fun noticeFor(state: PlayerViewModel.UiState): Notice? = when {
     !state.settings.serviceEnabled ->
         Notice("Servicio detenido", "Actívalo en Ajustes para cargar el reproductor.", NoticeAction.DIAGNOSTICS)
 
-    state.health.url?.contains("accounts.spotify.com") == true ->
+    // Con la sesion ya iniciada, este aviso solo estorba: tapaba medio visor
+    // en la pagina de cuenta, que es donde Spotify dice "Iniciaste sesion como".
+    state.health.url?.contains("accounts.spotify.com") == true && !state.settings.loggedIn ->
         if (state.health.passwordField) {
             // El formulario ya está en pantalla: aquí el aviso solo debe decir
             // qué hacer, no cómo llegar al formulario.

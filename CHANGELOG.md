@@ -1,5 +1,17 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.2]
+
+- **La app deja de pedir login cuando la sesion ya esta iniciada.** `noticeFor()` mostraba
+  "Falta iniciar sesion" para cualquier pagina de `accounts.spotify.com` sin campo de
+  contrasena, incluida `accounts.spotify.com/es/status`, que dice literalmente
+  "Iniciaste sesion como <usuario> · Cerrar sesion". El cartel tapaba medio visor sin motivo.
+
+  Dos cambios en el mismo arreglo: `detectSession()` en `60_login.js` reconoce la sesion
+  desde la propia pagina (texto visible o widget de cuenta del reproductor) y emite
+  `session-detected`, que `PlayerBridge` ya sabia interpretar; y el aviso de login queda
+  condicionado a `!state.settings.loggedIn`.
+
 ## [1.0.1]
 
 - **Se reactiva el bloqueo de anuncios**: `AdBlocker.SAFE_MODE` pasa de `true` a `false`.

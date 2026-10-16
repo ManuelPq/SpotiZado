@@ -46,6 +46,13 @@
     spotiNotify('login', { phase: 'session-detected' });
   }
 
+  // Deteccion POSITIVA de sesion. La heuristica del boton `web-player-link`
+  // solo existe en una pantalla concreta: en `accounts.spotify.com/es/status`
+  // no hay ningun boton asi, y la app se quedaba creyendo que no habia sesion
+  // aunque la pagina dijera "Iniciaste sesion como ... Cerrar Sesion". El
+  // cartel "Falta iniciar sesion" tapaba entonces medio visor para siempre.
+  detectSession();
+
   /**
    * Busca un boton de entrada por email y lo pulsa una sola vez. Se reintenta
    * un par de veces porque el login de Spotify se dibuja por partes.
@@ -135,5 +142,28 @@
       spotiNotify('login', { phase: 'classic-link-added' });
       return;
     }
+  }
+
+  /**
+   * Marca la sesion como iniciada leyendo la propia pagina.
+   *
+   * El dato lo pone Spotify en el texto visible: "Iniciaste sesion como <usuario>"
+   * y una accion "Cerrar sesion". Tambien vale el widget de cuenta del
+   * reproductor. Se reintenta unas cuantas veces porque estas pantallas se
+   * dibujan por partes; no es un bucle abierto.
+   */
+  function detectSession() {
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (document.querySelector('[data-testid=user-widget-link]') ||
+          document.querySelector('[data-testid=user-widget-avatar]') ||
+          /Iniciaste sesi\u00f3n como|Cerrar sesi\u00f3n|Iniciar sesi\u00f3n como/i.test(document.body ? document.body.innerText : '')) {
+        clearInterval(timer);
+        spotiNotify('login', { phase: 'session-detected' });
+        return;
+      }
+      if (tries > 8) clearInterval(timer);
+    }, 900);
   }
 })();

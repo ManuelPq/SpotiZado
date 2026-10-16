@@ -161,7 +161,17 @@ class PlayerWebViewClient(
             // SIEMPRE, esté o no marcada la sesión. Antes dependía de un heurístico
             // (el botón `web-player-link`) y, si no aparecía, no se inyectaba nada:
             // sin controles, sin AdGuard y sin pista alguna de por qué.
-            url.startsWith(PREFIX_PLAYER) -> bridge.onPlayerPageReady(view)
+            url.startsWith(PREFIX_PLAYER) -> {
+                // Deteccion NATIVA de sesion, sin depender de ningun script: si la
+                // navegacion ha llegado al reproductor, el login ha terminado. Antes
+                // esto solo se deducia desde JS, y si el JS no se disparaba la app
+                // seguia creyendo que no habia sesion y volvia a pedir login.
+                if (!bridge.isLoggedIn()) {
+                    bridge.setLoggedIn(true)
+                    bridge.onLoggedInFromNavigation()
+                }
+                bridge.onPlayerPageReady(view)
+            }
 
             else -> bridge.requestLoginDetection(view)
         }
@@ -229,6 +239,15 @@ class PlayerWebViewClient(
             isUserGesture: Boolean,
             resultMsg: android.os.Message
         ): Boolean {
+            // Solo se atienden las ventanas que abre el USUARIO con un toque.
+            //
+            // `javaScriptCanOpenWindowsAutomatically` deja que la pagina abra
+            // ventanas sin gesto alguno. Redirigirlas a este mismo WebView navega
+            // la vista a esa ventana, y si es una pagina vacia o bloqueada la deja
+            // EN NEGRO. Un reproductor de una sola vista no necesita emergentes
+            // automaticas: las que importan (OAuth) son siempre por gesto.
+            if (!isUserGesture) return false
+
             val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
             transport.webView = view
             resultMsg.sendToTarget()

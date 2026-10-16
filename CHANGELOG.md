@@ -1,5 +1,23 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.5]
+
+- **Se retira TODO el codigo de la app de la pagina de login.** El diagnostico de
+  la 1.0.4 lo dejaba claro: `vw=384 sw=384 zoom=1.0`, layout correcto y SIN
+  desbordamiento, formulario presente (`campos=2 pwd=si`) y la zona igualmente en
+  negro. O sea: el problema nunca fue el viewport, y las unicas diferencias entre
+  esta app y Chrome eran las ayudas que inyectabamos.
+
+  `60_login.js` pasa a ser de solo lectura: ya NO pulsa botones, NO hace scroll,
+  NO inserta elementos y NO toca estilos ni el viewport. Unica excepcion: el boton
+  de consentimiento de Facebook, que bloquea el flujo si no se pulsa.
+
+- **La sesion se detecta de forma nativa** cuando la navegacion llega a
+  `open.spotify.com`, sin depender de ningun script.
+- **Las ventanas emergentes automaticas dejan de redirigirse al mismo WebView**:
+  solo se atienden las que abre el usuario con un toque. Una emergente automatica
+  redirigida aqui navegaba la vista a una pagina vacia y la dejaba en negro.
+
 ## [1.0.4]
 
 - **Revertido un cambio mio no medido**: en la 1.0.3 quite el tamano declarado

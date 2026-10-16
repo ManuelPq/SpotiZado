@@ -65,6 +65,16 @@ class PlayerBridge(
 
     fun isLoggedIn(): Boolean = loggedIn
     fun setLoggedIn(value: Boolean) { loggedIn = value }
+
+    /**
+     * La navegacion ha llegado al reproductor: el login ha terminado, sin
+     * depender de ningun script de la pagina. Lo unico que hace es persistir el
+     * dato para que la app no vuelva a pedir credenciales en el proximo arranque.
+     */
+    fun onLoggedInFromNavigation() {
+        loggedIn = true
+        onLoggedIn()
+    }
     fun markBridgeUnsupported() { bridgeUnsupported = true; Log.e(TAG, "WebMessageListener no soportado") }
     val isBridgeUnsupported: Boolean get() = bridgeUnsupported
 

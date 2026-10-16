@@ -241,7 +241,11 @@ class PlayerBridge(
                 scrollWidth = o.optInt("scrollW"),
                 pageScale = o.optDouble("scale", 0.0),
                 visualScale = o.optDouble("visual", 1.0),
-                drmStatus = o.optString("drm", null)
+                drmStatus = o.optString("drm", null),
+                layoutWidth = o.optInt("clientW"),
+                metaViewport = o.optString("metaVp", null),
+                devicePixelRatio = o.optDouble("dpr", 0.0),
+                pageText = o.optString("bodyText", null)
             )
         }.getOrElse {
             Log.w(TAG, "sonda ilegible", it)

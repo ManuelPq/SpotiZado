@@ -1,5 +1,19 @@
 # Historial de versiones — SpotiZado
 
+## 0.3.1 — 2026-10-16
+**El arreglo del «no se usa el 100 % de pantalla».** Medido en el dispositivo:
+`Vista / documento = 1920x978 / 420`. `innerWidth` valia 1920 (nuestro spoof) pero el
+layout real media 420: el JS de Spotify creia tener 1920 px y servia la interfaz de
+ESCRITORIO, mientras el CSS se maquetaba a 420 por el meta viewport de Spotify. La UI
+se salia de la pantalla. Ahora se fuerza el layout viewport a 1920 para que coincida
+con el spoof, y el WebView escala 1920 -> 420.
+
+Sonda ampliada: `clientW` (ancho de layout), `metaVp` (que dice el meta viewport),
+`dpr` y `bodyText` (primer texto de la pagina, revela errores de reproduccion).
+
+Datos confirmados por el usuario: `Widevine = widevine OK`, `Boton de play = si`,
+`Elementos de audio/video = 0` (el stream no arranca).
+
 ## 0.3.0 — 2026-10-16 — build de diagnostico
 - **Banda de estado de una linea** en lugar de la tarjeta de aviso, que en las
   capturas del dispositivo ocupaba el 35-40 % del alto: nuestra propia interfaz le

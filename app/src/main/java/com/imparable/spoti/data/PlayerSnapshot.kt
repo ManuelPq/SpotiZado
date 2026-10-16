@@ -67,7 +67,15 @@ data class PlayerHealth(
      */
     val visualScale: Double = 1.0,
     /** Soporte de Widevine (EME): sin el, el audio del reproductor no suena. */
-    val drmStatus: String? = null
+    val drmStatus: String? = null,
+    /** Ancho del layout viewport (sin spoof). Debe coincidir con `viewportWidth`. */
+    val layoutWidth: Int = 0,
+    /** Contenido del meta viewport: dice si el ajuste de coherencia se aplico. */
+    val metaViewport: String? = null,
+    /** Densidad de pixeles del dispositivo. */
+    val devicePixelRatio: Double = 0.0,
+    /** Primer texto visible de la pagina: revela mensajes de error de Spotify. */
+    val pageText: String? = null
 )
 
 /** Estadísticas del bloqueo, para el panel de diagnóstico. */

@@ -534,6 +534,23 @@ private fun PlayerNotice(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = "layout=" + state.health.layoutWidth + " vp="
+                    + (state.health.metaViewport ?: "-") + " dpr=" + state.health.devicePixelRatio,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            state.health.pageText?.let { t ->
+                Text(
+                    text = t,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             state.health.url?.let { url ->
                 Text(
                     text = url.take(72),
@@ -703,6 +720,7 @@ private fun PlayerStrip(
                     append(" | drm=").append(state.health.drmStatus ?: "-")
                     append(" | ready=").append(if (state.health.ready) "si" else "no")
                     append(" | play=").append(if (state.health.playButtonPresent) "si" else "no")
+                    append(" | audio=").append(state.health.mediaElements)
                     append(" | ads=").append(state.settings.adBlockMode.name.lowercase())
                     append("/").append(state.settings.adGuardMode.name.lowercase())
                 },

@@ -30,6 +30,17 @@ JSON.stringify({
     return r.top < window.innerHeight && r.bottom > 0 &&
            r.left < window.innerWidth && r.right > 0;
   })(),
+  // Ancho del LAYOUT (sin spoof). Debe acabar siendo 1920 como innerWidth.
+  clientW: (document.documentElement && document.documentElement.clientWidth) || 0,
+  // Que dice el meta viewport: si es 'width=1920', el arreglo funciono.
+  metaVp: (function () {
+    var m = document.querySelector('meta[name=viewport]');
+    return m ? (m.getAttribute('content') || '') : 'sin meta';
+  })(),
+  dpr: window.devicePixelRatio || 1,
+  // Lo primero que dice la pagina: si Spotify muestra un error de reproduccion
+  // ('Algo salio mal', 'Can\'t play this right now'), aqui se vera.
+  bodyText: ((document.body && document.body.innerText) || '').replace(/\s+/g, ' ').slice(0, 180),
   vw: window.innerWidth,
   vh: window.innerHeight,
   scrollW: (document.documentElement && document.documentElement.scrollWidth) || 0,

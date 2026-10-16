@@ -502,6 +502,9 @@ private fun PlayerNotice(
 
     val notice = noticeFor(state) ?: return
     var dismissedTitle by remember { mutableStateOf<String?>(null) }
+    // Los datos largos van plegados por defecto: esta tarjeta llegaba a ocupar
+    // media pantalla y tapaba el propio formulario de login que anunciaba.
+    var expanded by remember { mutableStateOf(false) }
     if (dismissedTitle == notice.title) return
 
     Card(
@@ -528,18 +531,27 @@ private fun PlayerNotice(
             // depende de que el usuario encuentre el panel de Diagnóstico y lea
             // las filas correctas; con esto basta con mirar el aviso.
             Spacer(Modifier.height(6.dp))
-            Text(
-                text = buildString {
-                    append("v").append(BuildConfig.VERSION_NAME)
-                    append(" · campos=").append(state.health.inputCount)
-                    append(" · pwd=").append(if (state.health.passwordField) "sí" else "no")
-                    append(" · visible=").append(if (state.health.passwordVisible) "sí" else "no")
-                    append(" · vw=").append(state.health.viewportWidth)
-                    append(" · sw=").append(state.health.scrollWidth)
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = buildString {
+                        append("v").append(BuildConfig.VERSION_NAME)
+                        append(" · campos=").append(state.health.inputCount)
+                        append(" · pwd=").append(if (state.health.passwordField) "sí" else "no")
+                        append(" · visible=").append(if (state.health.passwordVisible) "sí" else "no")
+                        append(" · vw=").append(state.health.viewportWidth)
+                        append(" · sw=").append(state.health.scrollWidth)
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                androidx.compose.material3.TextButton(onClick = { expanded = !expanded }) {
+                    Text(if (expanded) "Ocultar" else "Datos", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+if (expanded) {
             Text(
                 text = "layout=" + state.health.layoutWidth + " vp="
                     + (state.health.metaViewport ?: "-") + " dpr=" + state.health.devicePixelRatio,
@@ -582,6 +594,8 @@ private fun PlayerNotice(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            }
+
 
             Spacer(Modifier.height(8.dp))
             Row(

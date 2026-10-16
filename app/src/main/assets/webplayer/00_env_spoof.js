@@ -6,16 +6,12 @@
  */
 (function () {
   var g = function (obj, prop, value) { obj.__defineGetter__(prop, function () { return value; }); };
-  g(window.screen, 'width', 1920);
-  g(window.screen, 'height', 1080);
-  g(window.screen, 'availWidth', 1920);
-  g(window.screen, 'availHeight', 1040);
+  // TAMANO: no se falsea. Antes se declaraban 1920x1080 aqui, asi que el JS de
+  // Spotify creia tener una pantalla de escritorio mientras el CSS se maquetaba
+  // al ancho real (384 px). Esa contradiccion obligaba a forzar el meta viewport
+  // para cuadrarla y acababa sacando la interfaz fuera de la pantalla.
   g(window.screen, 'colorDepth', 24);
   g(window.screen, 'pixelDepth', 24);
-  g(window, 'innerWidth', 1920);
-  g(window, 'innerHeight', 978);
-  g(window, 'outerWidth', 1920);
-  g(window, 'outerHeight', 1040);
   g(window.navigator, 'vendor', 'Google Inc.');
   g(window.navigator, 'productSub', '20030107');
   g(window.navigator, 'platform', 'Win32');
@@ -23,33 +19,30 @@
   g(window.navigator, 'maxTouchPoints', 0);
 
   /*
-   * COHERENCIA DE VIEWPORT — el arreglo del 100 % de pantalla.
+   * VIEWPORT: se fija al ANCHO REAL del dispositivo.
    *
-   * Medido en el dispositivo: `Vista / documento = 1920x978 / 420`.
-   *   - `window.innerWidth` = 1920  → lo pone este spoof.
-   *   - `document.scrollWidth` = 420 → el ancho REAL del layout.
+   * Antes se forzaba `width=1920`. Medido en el dispositivo con la 1.0.2:
+   *   Vista / documento = 1920x978 / 1920 · Escala de maquetacion 1.0 · VISUAL 1.0
+   * O sea: una pagina de 1920 px CSS metida, sin reducir, en una ventana de
+   * 384 dp. Solo cabia la esquina superior izquierda y hacia falta scroll en los
+   * dos sentidos. La interfaz no se veia porque estaba fuera de la pantalla.
    *
-   * Esa contradiccion es el fallo: el JS de Spotify cree que hay 1920 px y por
-   * eso sirve su interfaz de ESCRITORIO, que necesita ese ancho; pero el CSS se
-   * maqueta a 420 px (por el `meta viewport` de Spotify, que manda
-   * `width=device-width`). La UI de escritorio se sale de la pantalla y solo se
-   * ve el trozo que cae dentro de esos 420 px: de ahi el area negra y la
-   * sensacion de que «no se usa el 100 %».
-   *
-   * Solucion: forzar el layout viewport a 1920 para que coincida con lo que
-   * declara el spoof. El WebView entonces escala 1920 -> 420 y todo cuadra:
-   * layout de escritorio, visible entero y coherente con el JS.
+   * `width=device-width` + `initial-scale=1` es lo que RESPETA las medidas de la
+   * pantalla: el layout coincide con el ancho real y no hay desbordamiento. Es
+   * ademas lo que necesita el CSS de 40_layout.js, que adapta la interfaz de
+   * escritorio a ese ancho.
    */
   function spotiFixViewport() {
     var head = document.head || document.documentElement;
     if (!head) return;
+    var want = 'width=device-width, initial-scale=1';
     var m = document.querySelector('meta[name=viewport]');
     if (m) {
-      if (m.getAttribute('content') !== 'width=1920') m.setAttribute('content', 'width=1920');
+      if (m.getAttribute('content') !== want) m.setAttribute('content', want);
     } else {
       m = document.createElement('meta');
       m.name = 'viewport';
-      m.setAttribute('content', 'width=1920');
+      m.setAttribute('content', want);
       head.appendChild(m);
     }
   }

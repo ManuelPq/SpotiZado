@@ -99,7 +99,12 @@ object PlayerWebViewFactory {
             // que ninguna medida anterior podia detectarlo: lo que estaba mal era
             // la ESCALA VISUAL. Se anade esa medida a la sonda.
             loadWithOverviewMode = desktop
-            webView.setInitialScale(if (desktop) 100 else 0)
+            // `setInitialScale(100)` era el segundo clavo: fuerza el zoom a 1.0 y
+            // anula el encaje automatico de `useWideViewPort`+`loadWithOverviewMode`.
+            // Medido en el dispositivo: 1920 px de maquetacion a zoom 1.0 dentro de
+            // una ventana de 384 dp -> scroll en los dos sentidos. Con 0 decide el
+            // WebView, que es quien conoce el tamano real de la vista.
+            webView.setInitialScale(0)
         }
     }
 

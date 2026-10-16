@@ -1,5 +1,23 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.3]
+
+- **La interfaz vuelve a caber en la pantalla.** La 1.0.2 medía
+  `Vista / documento 1920x978 / 1920`, `Escala 1.0`: una página de 1920 px CSS
+  sin reducir dentro de una ventana de 384 dp. Solo cabía la esquina superior
+  izquierda, de ahí el scroll en los dos sentidos y la zona negra.
+
+  Dos causas, las dos localizadas: `00_env_spoof.js` falseaba el tamaño a
+  1920x1080 y forzaba `meta viewport width=1920`, y `applyProfile` remataba con
+  `setInitialScale(100)`, que anula el encaje automático del WebView. Ahora el
+  tamaño que ve el JS es el real, el viewport se fija a `width=device-width` y
+  la escala la decide el WebView.
+
+- **Modo Móvil por defecto** otra vez (`GuiMode.MOBILE`): es la interfaz que
+  Spotify diseña para un teléfono. Escritorio sigue disponible en Ajustes.
+- **El aviso de login ya no tapa el formulario**: los datos largos van plegados
+  tras un botón "Datos"; antes la tarjeta ocupaba media pantalla.
+
 ## [1.0.2]
 
 - **La app deja de pedir login cuando la sesion ya esta iniciada.** `noticeFor()` mostraba

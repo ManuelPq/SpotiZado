@@ -43,7 +43,7 @@ data class Settings(
      * si reproduce la lista entera y permite el aleatorio: comportarse como la
      * version de PC, que es lo que se pide.
      */
-    val guiMode: GuiMode = GuiMode.DESKTOP,
+    val guiMode: GuiMode = GuiMode.MOBILE,
     val amoled: Boolean = true,
     val accentColor: String? = null,
     val autoCloseNowPlaying: Boolean = false,
@@ -106,7 +106,7 @@ class SettingsRepository(private val context: Context) {
         adBlockMode = p[Keys.adBlockMode].toEnum(AdBlockMode.STRICT),
         adGuardMode = p[Keys.adGuardMode].toEnum(AdGuardMode.SILENT_AND_SKIP),
         blockListAutoUpdate = p[Keys.blockListAutoUpdate] ?: true,
-        guiMode = p[Keys.guiMode].toEnum(GuiMode.DESKTOP),
+        guiMode = p[Keys.guiMode].toEnum(GuiMode.MOBILE),
         showNativePlayerBar = p[Keys.showNativePlayerBar] ?: false,
         amoled = p[Keys.amoled] ?: true,
         accentColor = p[Keys.accentColor],

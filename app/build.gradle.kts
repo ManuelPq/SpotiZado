@@ -13,8 +13,8 @@ android {
         applicationId = "com.imparable.spoti"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.0.2"
+        versionCode = 18
+        versionName = "1.0.3"
     }
 
     buildFeatures {

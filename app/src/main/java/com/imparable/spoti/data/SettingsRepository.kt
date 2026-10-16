@@ -38,6 +38,12 @@ data class Settings(
      * pintados sobre la pagina. Herramienta de diagnostico, apagada por defecto.
      */
     val calibration: Boolean = false,
+
+    /**
+     * MODO LIMPIO: apaga TODA inyeccion de la app. Es el experimento de control
+     * que separa "fallo de nuestro JavaScript" de "fallo del motor WebView".
+     */
+    val cleanMode: Boolean = false,
     val adBlockMode: AdBlockMode = AdBlockMode.STRICT,
     val adGuardMode: AdGuardMode = AdGuardMode.SILENT_AND_SKIP,
     val blockListAutoUpdate: Boolean = true,
@@ -87,6 +93,7 @@ class SettingsRepository(private val context: Context) {
         val serviceEnabled = booleanPreferencesKey("service_enabled")
         val loggedIn = booleanPreferencesKey("logged_in")
         val calibration = booleanPreferencesKey("calibration")
+        val cleanMode = booleanPreferencesKey("clean_mode")
         val adBlockMode = stringPreferencesKey("adblock_mode")
         val adGuardMode = stringPreferencesKey("adguard_mode")
         val blockListAutoUpdate = booleanPreferencesKey("blocklist_auto_update")
@@ -111,6 +118,7 @@ class SettingsRepository(private val context: Context) {
         serviceEnabled = p[Keys.serviceEnabled] ?: true,
         loggedIn = p[Keys.loggedIn] ?: false,
         calibration = p[Keys.calibration] ?: false,
+        cleanMode = p[Keys.cleanMode] ?: false,
         adBlockMode = p[Keys.adBlockMode].toEnum(AdBlockMode.STRICT),
         adGuardMode = p[Keys.adGuardMode].toEnum(AdGuardMode.SILENT_AND_SKIP),
         blockListAutoUpdate = p[Keys.blockListAutoUpdate] ?: true,
@@ -133,6 +141,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setLoggedIn(value: Boolean) = edit { it[Keys.loggedIn] = value }
 
     suspend fun setCalibration(value: Boolean) = edit { it[Keys.calibration] = value }
+
+    suspend fun setCleanMode(value: Boolean) = edit { it[Keys.cleanMode] = value }
     suspend fun setAdBlockMode(value: AdBlockMode) = edit { it[Keys.adBlockMode] = value.name }
     suspend fun setAdGuardMode(value: AdGuardMode) = edit { it[Keys.adGuardMode] = value.name }
     suspend fun setBlockListAutoUpdate(value: Boolean) = edit { it[Keys.blockListAutoUpdate] = value }
@@ -157,6 +167,7 @@ class SettingsRepository(private val context: Context) {
         p[Keys.serviceEnabled] = settings.serviceEnabled
         p[Keys.loggedIn] = settings.loggedIn
         p[Keys.calibration] = settings.calibration
+        p[Keys.cleanMode] = settings.cleanMode
         p[Keys.adBlockMode] = settings.adBlockMode.name
         p[Keys.adGuardMode] = settings.adGuardMode.name
         p[Keys.blockListAutoUpdate] = settings.blockListAutoUpdate

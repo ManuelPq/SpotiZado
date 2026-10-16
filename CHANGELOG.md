@@ -1,5 +1,26 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.7]
+
+- **Modo limpio (sin inyección)** en Ajustes → Diagnóstico. Con él activo la app no
+  inyecta NADA: ni spoof, ni control, ni sonda, ni calibración, ni ayudas de login. El
+  visor queda como un navegador sin tocar. Es el EXPERIMENTO DE CONTROL.
+
+  Lo pidió la lectura de la capa de calibración: la rejilla de la app SÍ se pintaba
+  sobre la página mientras el formulario de Spotify NO, con geometría correcta
+  (`left=24 w=336` sobre 384) y `OK en vista`. Eso deja dos culpables — el JavaScript
+  que inyectamos o el motor WebView — y ninguna captura los separa. Este interruptor sí:
+  si en modo limpio el login se ve, el culpable es nuestro JavaScript; si sigue negro,
+  no es nuestro código.
+
+  El corte es un único punto: todos los scripts entran por los métodos `build*` de
+  `InjectionComposer`, que devuelven cadena vacía en modo limpio.
+
+- **La calibración ahora dice POR QUÉ** no se ve el formulario: además de las medidas,
+  informa del estilo CALCULADO del campo de contraseña y de sus tres ancestros
+  (`visibility`, `opacity`, `display`) y del color de fondo real de la página. Un
+  `vis=hidden`, un `op=0` o un `disp=none` en cualquier nivel lo explica sin más capturas.
+
 ## [1.0.6]
 
 - **Capa de calibración** (Ajustes → Diagnóstico), apagada por defecto. Pinta sobre la

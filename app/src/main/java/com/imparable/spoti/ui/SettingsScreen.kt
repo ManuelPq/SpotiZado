@@ -137,6 +137,15 @@ fun SettingsContent(state: PlayerViewModel.UiState, viewModel: PlayerViewModel) 
                 "para usar la app normal. Cambia el ajuste y vuelve a abrir el reproductor."
         , s.calibration) { viewModel.setCalibration(it) }
 
+        Spacer(Modifier.height(8.dp))
+        SwitchRow(
+            "Modo limpio (sin inyección)",
+            "La app no inyecta NADA: el visor queda como un navegador sin tocar. " +
+                "Es el experimento de control: si con esto el login se ve, el culpable " +
+                "es nuestro JavaScript; si sigue negro, no es nuestro código. " +
+                "Cambia el ajuste y vuelve a abrir el reproductor."
+        , s.cleanMode) { viewModel.setCleanMode(it) }
+
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
 
         Text("Lista de bloqueo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

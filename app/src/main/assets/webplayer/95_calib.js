@@ -128,6 +128,24 @@
     var vv = window.visualViewport;
     var out = [];
 
+    // Por que el formulario puede estar presente y no verse: se lee el estilo
+    // CALCULADO del campo y de sus tres ancestros. Un `vis=hidden`, un `op=0` o
+    // un `disp=none` en cualquier nivel lo explica sin mas capturas.
+    function chain(el) {
+      var parts = [];
+      var n = 0;
+      while (el && n < 4) {
+        try {
+          var cs = getComputedStyle(el);
+          parts.push((el.tagName || '?').toLowerCase().split(':')[0]
+            + '(vis=' + cs.visibility + ' op=' + cs.opacity + ' disp=' + cs.display + ')');
+        } catch (e) { parts.push('?'); }
+        el = el.parentElement;
+        n++;
+      }
+      return parts.join(' < ');
+    }
+
     out.push('CALIBRACION   innerW=' + window.innerWidth + '  innerH=' + window.innerHeight
       + '   (' + Math.round(window.innerWidth * dpr) + 'x' + Math.round(window.innerHeight * dpr)
       + ' px fisicos)');
@@ -143,6 +161,14 @@
     } else {
       out.push('form pwd: NO existe en el DOM');
     }
+    var p2 = pwd();
+    out.push(p2 ? ('cadena: ' + chain(p2)) : 'cadena: sin campo de contrasena');
+    try {
+      var bs = getComputedStyle(document.body);
+      var hs = getComputedStyle(document.documentElement);
+      out.push('fondo: html=' + hs.backgroundColor + ' body=' + bs.backgroundColor
+        + '  texto=' + (document.body ? document.body.innerText.trim().length : -1) + ' car.');
+    } catch (e) { out.push('fondo: no legible'); }
     out.push('url=' + location.href.substring(0, 96));
 
     if (readout) readout.textContent = out.join('\n');

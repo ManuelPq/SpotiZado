@@ -140,7 +140,9 @@ class PlayerWebViewClient(
         // esta pintando nada de la pagina; si sigue oscura, la pagina si pinta y el
         // contenido esta en otro sitio o tapado. Es la prueba que separa las dos
         // posibilidades de un vistazo.
-        if (com.imparable.spoti.injection.InjectionComposer.settings.calibration) {
+        if (com.imparable.spoti.injection.InjectionComposer.settings.calibration &&
+            !com.imparable.spoti.injection.InjectionComposer.settings.cleanMode
+        ) {
             view.setBackgroundColor(0xFFFF00FF.toInt())
             view.evaluateJavascript(bridge.composer.buildCalibScript(), null)
         } else {

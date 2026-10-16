@@ -43,17 +43,37 @@ class InjectionComposer(private val context: Context) {
 
     private val cache = HashMap<String, String>(20)
 
-    fun buildEnvSpoofScript(): String = load(ENV_SPOOF)
+    /**
+     * MODO LIMPIO: la app no inyecta NADA. Ni spoof, ni control, ni sonda, ni
+     * calibracion, ni ayudas de login.
+     *
+     * Es el EXPERIMENTO DE CONTROL, y el unico punto de corte esta aqui: todos
+     * los scripts de la app entran por los metodos build*, asi que devolviendo
+     * cadena vacia el WebView queda como un navegador sin tocar.
+     *
+     * Por que hace falta: con la capa de calibracion se vio que la rejilla de la
+     * app SI se pinta sobre la pagina mientras el formulario de Spotify NO, con
+     * geometria correcta (left=24 w=336 sobre 384) y en vista. Eso deja dos
+     * culpables posibles — el JavaScript que inyectamos o el motor WebView — y
+     * ninguna captura puede separarlos. Un interruptor que apague TODA inyeccion
+     * los separa de golpe:
+     *   - si en modo limpio el login se ve, el culpable es nuestro JavaScript;
+     *   - si sigue negro, no es nuestro codigo y hay que mirar el motor.
+     */
+    private val clean: Boolean
+        get() = settings.cleanMode
 
-    fun buildLoginScript(): String = load(HOST_BRIDGE) + load(LOGIN)
+    fun buildEnvSpoofScript(): String = if (clean) "" else load(ENV_SPOOF)
 
-    fun buildProbeScript(): String = load(PROBE)
+    fun buildLoginScript(): String = if (clean) "" else load(HOST_BRIDGE) + load(LOGIN)
+
+    fun buildProbeScript(): String = if (clean) "" else load(PROBE)
 
     /** Capa de calibracion: solo se inyecta si el ajuste esta activo. */
-    fun buildCalibScript(): String = load(CALIB)
+    fun buildCalibScript(): String = if (clean) "" else load(CALIB)
 
     /** Script de arranque: puente, comandos y tema, antes de tener el reproductor. */
-    fun buildBootScript(): String = buildString {
+    fun buildBootScript(): String = if (clean) "" else buildString {
         append(load(HOST_BRIDGE))
         append(load(STATE))
         append(load(CONTROL))
@@ -68,7 +88,7 @@ class InjectionComposer(private val context: Context) {
      * Controlador completo. El orden importa: el estado y los comandos deben
      * existir antes que el AdGuard y la búsqueda, que los reutilizan.
      */
-    fun buildPlayerScript(): String = buildString {
+    fun buildPlayerScript(): String = if (clean) "" else buildString {
         append(load(HOST_BRIDGE))
         append(load(STATE))
         append(load(CONTROL))

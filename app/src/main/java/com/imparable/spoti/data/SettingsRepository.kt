@@ -35,7 +35,15 @@ data class Settings(
     val adBlockMode: AdBlockMode = AdBlockMode.STRICT,
     val adGuardMode: AdGuardMode = AdGuardMode.SILENT_AND_SKIP,
     val blockListAutoUpdate: Boolean = true,
-    val guiMode: GuiMode = GuiMode.MOBILE,
+    /**
+     * Vista del reproductor. Por defecto ESCRITORIO.
+     *
+     * Motivo medido: en la vista movil el reproductor web no encadena la lista —
+     * al acabar una cancion hay que darle a reproducir otra vez. La de escritorio
+     * si reproduce la lista entera y permite el aleatorio: comportarse como la
+     * version de PC, que es lo que se pide.
+     */
+    val guiMode: GuiMode = GuiMode.DESKTOP,
     val amoled: Boolean = true,
     val accentColor: String? = null,
     val autoCloseNowPlaying: Boolean = false,
@@ -46,7 +54,15 @@ data class Settings(
     val bluetoothAutoPlay: Boolean = false,
     val bluetoothAutoStop: Boolean = false,
     val autoShutMinutes: Int = 0,
-    val sleepTimerMinutes: Int = 0
+    val sleepTimerMinutes: Int = 0,
+    /**
+     * Barra de reproduccion nativa (gris, bajo el reproductor).
+     *
+     * Apagada por defecto: no reflejaba bien el estado (llego a mostrar el nombre
+     * del dispositivo en vez de la pista) y el reproductor web ya trae sus
+     * propios controles. Se conserva el codigo para poder rehacerla.
+     */
+    val showNativePlayerBar: Boolean = false
 )
 
 /** Delegado de DataStore: de nivel de fichero, para que exista un único almacén. */
@@ -68,6 +84,7 @@ class SettingsRepository(private val context: Context) {
         val adGuardMode = stringPreferencesKey("adguard_mode")
         val blockListAutoUpdate = booleanPreferencesKey("blocklist_auto_update")
         val guiMode = stringPreferencesKey("gui_mode")
+        val showNativePlayerBar = booleanPreferencesKey("show_native_player_bar")
         val amoled = booleanPreferencesKey("amoled")
         val accentColor = stringPreferencesKey("accent_color")
         val autoCloseNowPlaying = booleanPreferencesKey("auto_close_now_playing")
@@ -89,7 +106,8 @@ class SettingsRepository(private val context: Context) {
         adBlockMode = p[Keys.adBlockMode].toEnum(AdBlockMode.STRICT),
         adGuardMode = p[Keys.adGuardMode].toEnum(AdGuardMode.SILENT_AND_SKIP),
         blockListAutoUpdate = p[Keys.blockListAutoUpdate] ?: true,
-        guiMode = p[Keys.guiMode].toEnum(GuiMode.MOBILE),
+        guiMode = p[Keys.guiMode].toEnum(GuiMode.DESKTOP),
+        showNativePlayerBar = p[Keys.showNativePlayerBar] ?: false,
         amoled = p[Keys.amoled] ?: true,
         accentColor = p[Keys.accentColor],
         autoCloseNowPlaying = p[Keys.autoCloseNowPlaying] ?: false,
@@ -109,6 +127,7 @@ class SettingsRepository(private val context: Context) {
     suspend fun setAdGuardMode(value: AdGuardMode) = edit { it[Keys.adGuardMode] = value.name }
     suspend fun setBlockListAutoUpdate(value: Boolean) = edit { it[Keys.blockListAutoUpdate] = value }
     suspend fun setGuiMode(value: GuiMode) = edit { it[Keys.guiMode] = value.name }
+    suspend fun setShowNativePlayerBar(value: Boolean) = edit { it[Keys.showNativePlayerBar] = value }
     suspend fun setAmoled(value: Boolean) = edit { it[Keys.amoled] = value }
     suspend fun setAccentColor(value: String?) = edit {
         if (value == null) it.remove(Keys.accentColor) else it[Keys.accentColor] = value
@@ -131,6 +150,7 @@ class SettingsRepository(private val context: Context) {
         p[Keys.adGuardMode] = settings.adGuardMode.name
         p[Keys.blockListAutoUpdate] = settings.blockListAutoUpdate
         p[Keys.guiMode] = settings.guiMode.name
+        p[Keys.showNativePlayerBar] = settings.showNativePlayerBar
         p[Keys.amoled] = settings.amoled
         settings.accentColor?.let { p[Keys.accentColor] = it } ?: p.remove(Keys.accentColor)
         p[Keys.autoCloseNowPlaying] = settings.autoCloseNowPlaying

@@ -122,7 +122,11 @@ fun PlayerScreen(
                 onOpenDiagnostics = { sheet = Sheet.DIAGNOSTICS }
             )
 
-            NowPlayingBar(state, viewModel)
+            // Barra nativa: apagada por defecto (el reproductor web ya trae sus
+            // propios controles y esta no reflejaba bien el estado).
+            if (state.settings.showNativePlayerBar) {
+                NowPlayingBar(state, viewModel)
+            }
         }
     }
 
@@ -702,6 +706,8 @@ private fun NowPlayingBar(state: PlayerViewModel.UiState, viewModel: PlayerViewM
  * existe el boton de reproduccion, el estado del viewport y, en el login, si el
  * formulario se ve.
  */
+// Se conserva sin usar por si se quiere reactivar el banner compacto.
+@Suppress("unused")
 @Composable
 private fun PlayerStrip(
     state: PlayerViewModel.UiState,

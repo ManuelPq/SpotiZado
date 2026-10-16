@@ -131,6 +131,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setAdGuardMode(mode: AdGuardMode) = viewModelScope.launch { graph.settings.setAdGuardMode(mode) }
     fun setGuiMode(mode: GuiMode) = viewModelScope.launch { graph.settings.setGuiMode(mode) }
+
+    fun setShowNativePlayerBar(value: Boolean) =
+        viewModelScope.launch { graph.settings.setShowNativePlayerBar(value) }
     fun setAmoled(value: Boolean) = viewModelScope.launch { graph.settings.setAmoled(value) }
     fun setAccent(value: String?) = viewModelScope.launch { graph.settings.setAccentColor(value) }
     fun setAutoCloseNowPlaying(value: Boolean) = viewModelScope.launch { graph.settings.setAutoCloseNowPlaying(value) }

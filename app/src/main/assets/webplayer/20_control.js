@@ -38,9 +38,28 @@
     } catch (e) { /* la observacion nunca debe romper la peticion */ }
 
     return oriFetch.apply(window, args).then(function (resp) {
-      // Sesion "bloqueada" por el servidor: recargar es la recuperacion conocida.
+      // Sesion "bloqueada" por el servidor.
+      //
+      // ANTES se pedia recargar al PRIMER 404, y eso pasa justo mientras suena un
+      // anuncio: la app recargaba en mitad del anuncio, este volvia a empezar,
+      // volvia el 404 y la pagina quedaba en bucle. Ese era el cuelgue.
+      //
+      // Ahora se exige bloqueo SOSTENIDO (4 fallos y >15 s) y que no haya
+      // reproduccion avanzando. Si es un anuncio, no se toca nada.
       if (resp.status === 404 && url.indexOf('connect-state') >= 0 && url.indexOf('/command/from/') >= 0) {
-        spotiNotify('reload', { reason: 'player-locked' });
+        var now = Date.now();
+        if (!window.spotiLockState) window.spotiLockState = { count: 0, first: now };
+        window.spotiLockState.count++;
+        var enAnuncio = !!(window.SpotiAdGuardState && window.SpotiAdGuardState.inAd);
+        var media = document.querySelector('audio,video');
+        var avanzando = !!(media && !media.paused && media.currentTime > 0);
+        if (!enAnuncio && !avanzando && window.spotiLockState.count >= 4 &&
+            now - window.spotiLockState.first > 15000) {
+          window.spotiLockState = { count: 0, first: now };
+          spotiNotify('reload', { reason: 'player-locked' });
+        }
+      } else if (resp.status >= 200 && resp.status < 300) {
+        window.spotiLockState = null;
       }
       return resp;
     });

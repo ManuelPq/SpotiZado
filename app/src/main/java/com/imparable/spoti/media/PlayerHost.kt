@@ -28,6 +28,17 @@ object PlayerHost {
     private val healthListeners = CopyOnWriteArrayList<(com.imparable.spoti.data.PlayerHealth) -> Unit>()
     private val adListeners = CopyOnWriteArrayList<(String) -> Unit>()
     private val reloadListeners = CopyOnWriteArrayList<(String) -> Unit>()
+
+    // Guardas contra el bucle de recargas. ANTES no habia ninguna: durante un
+    // anuncio Spotify responde 404 en connect-state, el script pedia recargar, la
+    // pagina se recargaba, el anuncio reiniciaba y volvia el 404 -> bucle infinito
+    // que dejaba la app bloqueada. Ese era el cuelgue con anuncios.
+    @Volatile private var reloadsInWindow = 0
+    @Volatile private var reloadWindowStart = 0L
+    @Volatile private var lastReloadAt = 0L
+    private const val MAX_RELOADS = 2
+    private const val RELOAD_WINDOW_MS = 180_000L
+    private const val MIN_RELOAD_GAP_MS = 8_000L
     private val searchListeners =
         CopyOnWriteArrayList<(String, Boolean, String?, List<SearchResult>) -> Unit>()
     private val queueListeners =
@@ -99,9 +110,23 @@ object PlayerHost {
         queueListeners.forEach { it(ok, reason, items) }
     }
 
-    /** El reproductor necesita recargarse (sesión bloqueada o atasco). */
+    /** Recarga automática pedida por el reproductor, CON GUARDAS. */
     fun publishReload(reason: String) {
+        val now = System.currentTimeMillis()
+        if (now - reloadWindowStart > RELOAD_WINDOW_MS) {
+            reloadWindowStart = now
+            reloadsInWindow = 0
+        }
+        if (reloadsInWindow >= MAX_RELOADS) {
+            Log.w(TAG, "Recarga automática ignorada (límite): $reason"); return
+        }
+        if (now - lastReloadAt < MIN_RELOAD_GAP_MS) {
+            Log.w(TAG, "Recarga automática ignorada (demasiado pronto): $reason"); return
+        }
+        reloadsInWindow++
+        lastReloadAt = now
         reloadListeners.forEach { it(reason) }
+        Log.i(TAG, "Recarga automática ($reloadsInWindow/$MAX_RELOADS): $reason")
         reload()
     }
 

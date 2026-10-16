@@ -205,8 +205,12 @@
 
     // Titulo del documento: el reproductor movil lo usa para la pista.
     if (!S.track && document.title) {
-      var t = document.title.replace(/\s*[-–]\s*(Spotify|Web Player)\s*$/i, '').trim();
-      if (t && t.length > 1) S.track = t;
+      var t = document.title.replace(/\s*[-–|]\s*(Spotify|Web Player)\s*$/i, '').trim();
+      // El titulo puede llevar el NOMBRE DEL DISPOSITIVO («2k1979 | Spotify»),
+      // que no es una pista: se descarta en lugar de mostrarlo como cancion.
+      var esDispositivo = /(?:^|\|)\s*Spotify\s*$/i.test(t) ||
+        /web player|mobile web|^[\w.-]+\s*\|\s*$/i.test(t);
+      if (t && t.length > 1 && !esDispositivo) S.track = t;
     }
 
     // Barra de progreso generica (el movil no usa el data-testid de escritorio).

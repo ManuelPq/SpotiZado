@@ -4,6 +4,7 @@ Un APK por versión publicada, más el código fuente de cada una.
 
 | Versión | APK | Notas |
 |---|---|---|
+| 1.0.0 | `SpotiZado-v1.0.0-debug.apk` | Version de pulido: vista escritorio por defecto, sin banner, sin barra gris, cuelgue de anuncios arreglado |
 | 0.4.0 | `SpotiZado-v0.4.0-debug.apk` | Control por la API de Connect: manda las ordenes al device_id del WebView; estado por mediaSession |
 | 0.3.2 | `SpotiZado-v0.3.2-debug.apk` | Ajuste Modo del reproductor conectado; por defecto Movil para el audio |
 | 0.3.1 | `SpotiZado-v0.3.1-debug.apk` | Coherencia de viewport: fuerza el layout a 1920 para que la UI de escritorio quepa |

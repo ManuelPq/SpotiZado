@@ -1,5 +1,21 @@
 # Historial de versiones — SpotiZado
 
+## 1.0.0 — 2026-10-16 — version de pulido
+- **Vista de escritorio por defecto**: el reproductor web de PC reproduce la lista
+  entera y permite el aleatorio. En la vista movil, al acabar una cancion habia que
+  darle a reproducir otra vez.
+- **Banner de arranque eliminado**: la banda con las verificaciones tecnicas ya no
+  ocupa sitio; esos datos siguen en Diagnostico.
+- **Barra nativa (gris) apagada por defecto**, con un interruptor en Ajustes para
+  reactivarla. Llego a mostrar el nombre del dispositivo («2k1979 | Spotify») en vez
+  de la pista.
+- **El cuelgue con anuncios, arreglado**: era nuestro. `publishReload()` recargaba la
+  pagina sin guarda; durante un anuncio Spotify responde 404 en `connect-state`, el
+  script pedia recargar, el anuncio reiniciaba y volvia el 404: bucle infinito. Ahora
+  hay limite (2 recargas cada 3 min, minimo 8 s entre ellas) y el JS exige bloqueo
+  sostenido (4 fallos y mas de 15 s) y que no haya reproduccion avanzando.
+- El lector de estado descarta titulos que son nombre de dispositivo.
+
 ## 0.4.0 — 2026-10-16 — control por la API de Connect
 **Causa raiz del player nativo muerto.** Todos los comandos de `20_control.js`
 pulsaban selectores del reproductor de ESCRITORIO

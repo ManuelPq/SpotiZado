@@ -102,13 +102,19 @@ fun SettingsContent(state: PlayerViewModel.UiState, viewModel: PlayerViewModel) 
             }
         }
         Text(
-            "Móvil reordena el reproductor de escritorio para pantalla pequeña. " +
-                "Escritorio lo deja tal cual (útil si algún día cambian los selectores).",
+            "Escritorio (recomendado): reproductor web de PC dentro de la app, reproduce la " +
+                "lista entera y permite el aleatorio. Móvil usa el reproductor de teléfono; si " +
+                "en Móvil no encadena las canciones, usa Escritorio.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(8.dp))
+        SwitchRow(
+            "Barra de reproducción nativa",
+            "Barra propia bajo el reproductor. Apagada porque no reflejaba bien el estado.",
+            s.showNativePlayerBar
+        ) { viewModel.setShowNativePlayerBar(it) }
         SwitchRow("Tema AMOLED", "Fondo negro puro en la app y en el reproductor.", s.amoled) {
             viewModel.setAmoled(it)
         }

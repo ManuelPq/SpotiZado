@@ -35,7 +35,7 @@ class InjectionComposer(private val context: Context) {
         const val LOGIN = DIR + "60_login.js"
         const val PROBE = DIR + "90_probe.js"
         const val CALIB = DIR + "95_calib.js"
-        const val REPAIR = DIR + "65_repair.js"
+        const val UNHIDE = DIR + "65_unhide.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
         @Volatile
@@ -73,8 +73,16 @@ class InjectionComposer(private val context: Context) {
     /** Capa de calibracion: solo se inyecta si el ajuste esta activo. */
     fun buildCalibScript(): String = if (clean) "" else load(CALIB)
 
-    /** Reparacion del formulario de login: solo si el ajuste esta activo. */
-    fun buildRepairScript(): String = if (clean) "" else load(HOST_BRIDGE) + load(REPAIR)
+    /**
+     * Arreglo de elementos ocultos: se inyecta en login Y en reproductor.
+     *
+     * El aviso de la bandera de calibracion va delante para que el script sepa si
+     * debe ENSENAR su medida o trabajar en silencio.
+     */
+    fun buildUnhideScript(): String = if (clean) "" else
+        load(HOST_BRIDGE) +
+            "window.__spotiCalibOn=${settings.calibration};" +
+            load(UNHIDE)
 
     /** Script de arranque: puente, comandos y tema, antes de tener el reproductor. */
     fun buildBootScript(): String = if (clean) "" else buildString {

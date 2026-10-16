@@ -161,13 +161,17 @@ class PlayerWebViewClient(
                 // aquí (rompería el maquetado), solo la ayuda de login.
                 view.evaluateJavascript(bridge.composer.buildLoginScript(), null)
 
-                // Reparacion experimental: cuando el formulario esta en la pagina
-                // pero no se pinta. Solo si el usuario la activa.
-                if (com.imparable.spoti.injection.InjectionComposer.settings.loginRepair) {
-                    // El fondo magenta distingue "la pagina no pinta" de "la pagina
-                    // pinta y el contenido no": la calibracion no llega aqui.
+                // Arreglo de elementos ocultos (login). Medido: el formulario
+                // estaba con la caja perfecta y no se pintaba por un ancestro.
+                if (com.imparable.spoti.injection.InjectionComposer.settings.unhideFix) {
+                    view.evaluateJavascript(bridge.composer.buildUnhideScript(), null)
+                }
+                // El fondo magenta es SOLO de diagnostico: sin calibracion, el
+                // visor vuelve a su color normal.
+                if (com.imparable.spoti.injection.InjectionComposer.settings.calibration) {
                     view.setBackgroundColor(0xFFFF00FF.toInt())
-                    view.evaluateJavascript(bridge.composer.buildRepairScript(), null)
+                } else {
+                    view.setBackgroundColor(0xFF121212.toInt())
                 }
             }
 
@@ -197,6 +201,17 @@ class PlayerWebViewClient(
                     bridge.onLoggedInFromNavigation()
                 }
                 bridge.onPlayerPageReady(view)
+
+                // EL MISMO ARREGLO EN EL REPRODUCTOR.
+                //
+                // Las capturas del reproductor ensenaban la cabecera dibujada y
+                // TODO lo de abajo en negro: el mismo sintoma que el login, que ya
+                // esta identificado como un ancestro que oculta el subarbol. Aqui va
+                // el juego conservador (ver 65_unhide.js): no toca `overflow` ni
+                // `transform`, que en el reproductor son parte del diseno.
+                if (com.imparable.spoti.injection.InjectionComposer.settings.unhideFix) {
+                    view.evaluateJavascript(bridge.composer.buildUnhideScript(), null)
+                }
             }
 
             else -> bridge.requestLoginDetection(view)

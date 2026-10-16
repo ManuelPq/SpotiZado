@@ -148,11 +148,12 @@ fun SettingsContent(state: PlayerViewModel.UiState, viewModel: PlayerViewModel) 
 
         Spacer(Modifier.height(8.dp))
         SwitchRow(
-            "Reparar formulario de login (experimental)",
-            "Fuerza opacidad, visibilidad y recorte en toda la cadena de ancestros del " +
-                "formulario y pinta el resultado en pantalla. Para cuando el formulario está " +
-                "en la página pero no se ve. Cambia el ajuste y vuelve a abrir el reproductor."
-        , s.loginRepair) { viewModel.setLoginRepair(it) }
+            "Reparar elementos ocultos",
+            "Spotify deja el formulario de login dentro de un contenedor que no se pinta: " +
+                "la caja está bien colocada pero no se ve. Esto fuerza la visibilidad de toda " +
+                "la cadena. Está activado porque sin él el login sale en negro; se puede " +
+                "apagar como salida de emergencia."
+        , s.unhideFix) { viewModel.setUnhideFix(it) }
 
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
 

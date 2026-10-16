@@ -1,5 +1,24 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.9]
+
+- **El login funciona.** Verificado en el dispositivo: al forzar la visibilidad de la
+  cadena de ancestros, el formulario aparece. El culpable era un ancestro del árbol que
+  ocultaba el subárbol, fuera del alcance de la cadena que se medía (que llegaba solo
+  hasta `form`) — coherente con `opacity` no heredada o un `overflow:hidden` con altura 0.
+
+- **El arreglo pasa a ser permanente y automático**: `65_unhide.js` sustituye al script
+  experimental y el ajuste queda **activado por defecto** (se puede apagar como salida de
+  emergencia). Si la calibración está activa, además informa de cuántos nodos ha forzado.
+
+- **El mismo arreglo se aplica ahora al REPRODUCTOR**, con un juego conservador: en el
+  reproductor `overflow:hidden` y `transform` son parte del diseño (paneles, scroll), así
+  que solo se toca lo que de verdad oculta — `opacity<1`, `visibility` distinta de visible,
+  `clip-path`, y `overflow:hidden` en elementos de altura 0. Las capturas del reproductor
+  enseñaban la cabecera dibujada y todo lo de abajo en negro: el mismo síntoma.
+
+- El fondo magenta del visor vuelve a ser **solo de diagnóstico** (con la calibración).
+
 ## [1.0.8]
 
 - **Reparar formulario de login** (Ajustes → Diagnóstico, experimental, apagada por defecto).

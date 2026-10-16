@@ -46,11 +46,15 @@ data class Settings(
     val cleanMode: Boolean = false,
 
     /**
-     * Reparacion del formulario de login. EXPERIMENTAL, apagada por defecto.
-     * Fuerza opacidad/visibilidad/desbordamiento en toda la cadena de ancestros
-     * del formulario y ensena la medida antes y despues.
+     * Reparar elementos ocultos. ACTIVADO por defecto.
+     *
+     * Ya no es un experimento: medido en el dispositivo, el formulario de login
+     * estaba con la caja perfecta (`left=24 w=336 OK en vista`) y no se pintaba
+     * porque un ancestro del arbol lo ocultaba. Al forzar la cadena, aparece.
+     *
+     * Se puede apagar desde Ajustes, como salida de emergencia.
      */
-    val loginRepair: Boolean = false,
+    val unhideFix: Boolean = true,
     val adBlockMode: AdBlockMode = AdBlockMode.STRICT,
     val adGuardMode: AdGuardMode = AdGuardMode.SILENT_AND_SKIP,
     val blockListAutoUpdate: Boolean = true,
@@ -101,7 +105,7 @@ class SettingsRepository(private val context: Context) {
         val loggedIn = booleanPreferencesKey("logged_in")
         val calibration = booleanPreferencesKey("calibration")
         val cleanMode = booleanPreferencesKey("clean_mode")
-        val loginRepair = booleanPreferencesKey("login_repair")
+        val unhideFix = booleanPreferencesKey("unhide_fix")
         val adBlockMode = stringPreferencesKey("adblock_mode")
         val adGuardMode = stringPreferencesKey("adguard_mode")
         val blockListAutoUpdate = booleanPreferencesKey("blocklist_auto_update")
@@ -127,7 +131,7 @@ class SettingsRepository(private val context: Context) {
         loggedIn = p[Keys.loggedIn] ?: false,
         calibration = p[Keys.calibration] ?: false,
         cleanMode = p[Keys.cleanMode] ?: false,
-        loginRepair = p[Keys.loginRepair] ?: false,
+        unhideFix = p[Keys.unhideFix] ?: true,
         adBlockMode = p[Keys.adBlockMode].toEnum(AdBlockMode.STRICT),
         adGuardMode = p[Keys.adGuardMode].toEnum(AdGuardMode.SILENT_AND_SKIP),
         blockListAutoUpdate = p[Keys.blockListAutoUpdate] ?: true,
@@ -153,7 +157,7 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setCleanMode(value: Boolean) = edit { it[Keys.cleanMode] = value }
 
-    suspend fun setLoginRepair(value: Boolean) = edit { it[Keys.loginRepair] = value }
+    suspend fun setUnhideFix(value: Boolean) = edit { it[Keys.unhideFix] = value }
     suspend fun setAdBlockMode(value: AdBlockMode) = edit { it[Keys.adBlockMode] = value.name }
     suspend fun setAdGuardMode(value: AdGuardMode) = edit { it[Keys.adGuardMode] = value.name }
     suspend fun setBlockListAutoUpdate(value: Boolean) = edit { it[Keys.blockListAutoUpdate] = value }
@@ -179,7 +183,7 @@ class SettingsRepository(private val context: Context) {
         p[Keys.loggedIn] = settings.loggedIn
         p[Keys.calibration] = settings.calibration
         p[Keys.cleanMode] = settings.cleanMode
-        p[Keys.loginRepair] = settings.loginRepair
+        p[Keys.unhideFix] = settings.unhideFix
         p[Keys.adBlockMode] = settings.adBlockMode.name
         p[Keys.adGuardMode] = settings.adGuardMode.name
         p[Keys.blockListAutoUpdate] = settings.blockListAutoUpdate

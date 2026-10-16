@@ -47,10 +47,13 @@ class AdBlocker(private val context: Context) {
          * bloquear endpoints esenciales del servidor, impidiendo que suenen las
          * pistas». Nuestra capa 1 va en modo STRICT con 1.316 reglas.
          *
-         * Con esto, la app queda como un contenedor puro: si asi suena, el
-         * culpable era nuestra capa; si no suena, es el WebView o el DRM.
+         * HISTORIAL: en 0.3.0 se puso a true para aislar el WebView y el DRM
+         * como sospechosos del fallo de audio. En 1.0.1 vuelve a false: las
+         * capas 1 (red) y 3 (neutralizador) recuperan su funcion. Los
+         * interruptores AdBlock y AdGuard de Ajustes siguen permitiendo
+         * apagarlas sin recompilar.
          */
-        const val SAFE_MODE = true
+        const val SAFE_MODE = false
     }
 
     private val exactRules = HashSet<String>(4096)

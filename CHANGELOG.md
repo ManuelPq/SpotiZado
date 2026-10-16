@@ -1,5 +1,11 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.1]
+
+- **Se reactiva el bloqueo de anuncios**: `AdBlocker.SAFE_MODE` pasa de `true` a `false`.
+  Capa 1 (red): 1.316 reglas en modo `STRICT`. Capa 3 (neutralizador): `SILENT_AND_SKIP`.
+  Unico cambio de la version: nada mas se toco.
+
 ## 1.0.0 — 2026-10-16 — version de pulido
 - **Vista de escritorio por defecto**: el reproductor web de PC reproduce la lista
   entera y permite el aleatorio. En la vista movil, al acabar una cancion habia que

@@ -1,5 +1,15 @@
 # Historial de versiones — SpotiZado
 
+## [sin versión] — plan
+
+- Añadido `docs/ESTRATEGIA-v1.1.md`: qué se reutiliza de Spotifuck y SpotiDuck (nada de
+  código: Spotifuck no tiene licencia y SpotiDuck solo publica binarios), qué se aporta
+  aquí, y el plan de bloqueo de anuncios en versiones de un solo cambio.
+
+- El plan fija el orden: primero una **grabadora de huella de anuncio** (v1.1.0), porque
+  detectar sin medir es adivinar; después detección por la API de Connect en lugar de
+  selectores, que no existen en el reproductor móvil.
+
 ## [1.0.9]
 
 - **El login funciona.** Verificado en el dispositivo: al forzar la visibilidad de la

@@ -11,9 +11,14 @@ controles de sistema y widget. Derivado del trabajo de **deviato** (Spotifuck).
 
 | Pieza | Estado |
 |---|---|
-| Login | **Resuelto** — verificado en dispositivo (`visible=sí`, `sw == vw` = 384) |
-| Reproducción | **Sin verificar** — siguiente hito |
-| Bloqueo de anuncios | Capa 1 (red) implementada, sin verificar con la app sonando |
+| Login | **Resuelto** — 1.0.9: verificado en dispositivo (`65_unhide.js`, ancestro oculto forzado) |
+| Interfaz del reproductor | **Sin verificar** — 1.0.9 aplica el mismo arreglo al reproductor |
+| Reproducción | Parcial: suena en modo Móvil |
+| Bloqueo de anuncios | Capa 1 (red) implementada; capa 3 (neutralización) **sin verificar** |
+
+**Objetivo del proyecto:** eliminar los anuncios combinando lo mejor de Spotifuck (andamiaje
+del reproductor web) y SpotiDuck (listas de bloqueo y sus advertencias), reimplementado desde
+cero. Ver `docs/ESTRATEGIA-v1.1.md` para el plan y para qué se puede y no se puede reutilizar.
 | Widget, temporizadores, exportar/importar | Sin verificar |
 
 ## Estructura que se busca

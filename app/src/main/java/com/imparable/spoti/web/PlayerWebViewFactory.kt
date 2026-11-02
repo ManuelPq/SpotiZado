@@ -203,9 +203,7 @@ object PlayerWebViewFactory {
     }
 
     private fun quote(value: String) = "\"" + value.replace("\"", "\\\"") + "\""
-}
-
-    /**
+/**
      * Version real de **Android System WebView**.
      *
      * Es lo primero que hay que mirar cuando una pagina compleja no se pinta. El
@@ -218,3 +216,4 @@ object PlayerWebViewFactory {
             pkg.packageName + " " + (pkg.versionName ?: "?")
         }
     }.getOrNull() ?: "desconocida"
+}

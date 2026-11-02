@@ -52,6 +52,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import com.imparable.spoti.BuildConfig
 
 /**
@@ -360,7 +366,50 @@ private fun DiagnosticsContent(state: PlayerViewModel.UiState, viewModel: Player
         DiagnosticRow("device_id", state.health.device ?: "—")
         DiagnosticRow("URL", state.health.url ?: "—")
 
-        Spacer(Modifier.height(12.dp))
+        /* ------------------------------------------------------------------
+         * INFORME EN TEXTO
+         *
+         * Diagnostico a distancia sin capturas: una sola pulsacion copia TODO
+         * (version, WebView, medidas, login, bloqueo) al portapapeles. El texto
+         * no tiene limite y se puede pegar en el chat tal cual.
+         * ------------------------------------------------------------------ */
+        val ctx = LocalContext.current
+        val webViewVersion = remember {
+            com.imparable.spoti.web.PlayerWebViewFactory.webViewVersion(ctx)
+        }
+
+        Spacer(Modifier.height(14.dp))
+        Text("Informe", style = MaterialTheme.typography.labelLarge)
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = {
+                    val text = com.imparable.spoti.data.DiagnosticReport.build(state, webViewVersion)
+                    copyToClipboard(ctx, text)
+                    Toast.makeText(ctx, "Informe copiado (${text.length} caracteres)", Toast.LENGTH_SHORT).show()
+                }
+            ) { Text("Copiar informe") }
+
+            AssistChip(
+                onClick = {
+                    val text = com.imparable.spoti.data.DiagnosticReport.build(state, webViewVersion)
+                    shareText(ctx, text)
+                },
+                label = { Text("Compartir") }
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
+            AssistChip(
+                onClick = {
+                    val text = com.imparable.spoti.data.DiagnosticReport.short(state, webViewVersion)
+                    copyToClipboard(ctx, text)
+                    Toast.makeText(ctx, "Resumen copiado", Toast.LENGTH_SHORT).show()
+                },
+                label = { Text("Copiar resumen (1 línea)") }
+            )
+        }
+
+        Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AssistChip(onClick = { viewModel.refreshStats() }, label = { Text("Actualizar") })
             AssistChip(onClick = { viewModel.resetCounters() }, label = { Text("Reiniciar contadores") })
@@ -816,5 +865,25 @@ private fun PlayerStrip(
                 )
             }
         }
+    }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Portapapeles y compartir                                                */
+/* ---------------------------------------------------------------------- */
+
+private fun copyToClipboard(context: Context, text: String) {
+    val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
+    cm.setPrimaryClip(ClipData.newPlainText("SpotiZado · diagnóstico", text))
+}
+
+private fun shareText(context: Context, text: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, "SpotiZado · diagnóstico")
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    runCatching {
+        context.startActivity(Intent.createChooser(intent, "Compartir informe"))
     }
 }

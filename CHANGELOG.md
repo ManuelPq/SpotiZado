@@ -1,5 +1,21 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.11]
+
+- **Informe de diagnóstico en TEXTO** (Diagnóstico → "Copiar informe"). Una pulsación copia
+  al portapapeles TODO lo que hace falta para diagnosticar: versión de la app, versión de
+  **Android System WebView**, modelo y API del teléfono, sesión, ajustes, URL, DRM,
+  `viewport`/`documento`/`zoom`, campos y visibilidad del login, pista sonando, `deviceId`
+  y estado del bloqueo.
+
+  Motivo: diagnosticar con capturas tenía dos problemas, y el segundo era grave — cada
+  captura responde a una sola pregunta, y las imágenes están **limitadas** por conversación.
+  El texto no tiene límite, se puede citar y se puede comparar. A partir de aquí el
+  diagnóstico se pide en texto, no en fotos.
+
+- Botón **Compartir** (envía el informe por cualquier app) y **Copiar resumen** (una línea,
+  para pegar en un chat sin que se corte).
+
 ## [1.0.10]
 
 - **Causa nueva, y descarta el CSS**: en el dispositivo, el fondo de la página SÍ se pinta

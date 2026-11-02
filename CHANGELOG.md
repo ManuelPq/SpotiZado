@@ -1,5 +1,24 @@
 # Historial de versiones — SpotiZado
 
+## [1.0.10]
+
+- **Causa nueva, y descarta el CSS**: en el dispositivo, el fondo de la página SÍ se pinta
+  (`body` = `rgb(18,18,18)`, casi negro) y la rejilla inyectada también, pero el TEXTO y
+  los controles de Spotify no. Mismo HTML en Chrome: correcto. Eso no es maquetación, es
+  **composición de capas del WebView**.
+
+- Tres medidas de renderizado: capa **HARDWARE** explícita para el WebView,
+  `setOffscreenPreRaster(true)` para forzar el rasterizado, y se deja de pelear con el
+  escalado automático en páginas que no son el reproductor.
+
+- **Revertida una regresión mía de la 1.0.5**: las ventanas emergentes se atienden otra vez
+  siempre. Al rechazar las que Spotify abre sin gesto, el flujo del login podía quedarse
+  esperando y la página no avanzaba.
+
+- **Nueva fila en Diagnóstico: versión de Android System WebView.** El README oficial de
+  SpotiDuck documenta «pantalla en blanco» y su remedio es actualizar el System WebView
+  desde Play Store; tener la versión a la vista evita diagnosticar a ciegas.
+
 ## [sin versión] — plan
 
 - Añadido `docs/ESTRATEGIA-v1.1.md`: qué se reutiliza de Spotifuck y SpotiDuck (nada de

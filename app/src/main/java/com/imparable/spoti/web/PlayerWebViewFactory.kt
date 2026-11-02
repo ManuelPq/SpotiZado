@@ -150,6 +150,26 @@ object PlayerWebViewFactory {
         webView.setBackgroundColor(0xFF121212.toInt())
         webView.isScrollbarFadingEnabled = true
 
+        /*
+         * RENDERIZADO. Medido en el dispositivo: el fondo de la pagina
+         * (`body` = rgb(18,18,18)) SI se pinta y mi rejilla inyectada tambien,
+         * pero el TEXTO y los controles de la pagina NO. Con el mismo HTML en
+         * Chrome se ve bien. Eso descarta el CSS y apunta a la composicion de
+         * capas del WebView: la pagina crea capas (backdrop-filter, transform,
+         * will-change) y el motor no las compone.
+         *
+         * Tres medidas, de la mas barata a la mas contundente:
+         *   1. capa HARDWARE explicita para el WebView;
+         *   2. `setOffscreenPreRaster`, que fuerza a rasterizar aunque la vista
+         *      no se considere visible;
+         *   3. desactivar el "wide viewport" solo en paginas no-reproductor, que
+         *      es donde el escalado automatico peleaba con el CSS.
+         */
+        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        with(webView.settings) {
+            runCatching { setOffscreenPreRaster(true) }
+        }
+
         // Puente tipado y restringido por origen.
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
             WebViewCompat.addWebMessageListener(
@@ -184,3 +204,17 @@ object PlayerWebViewFactory {
 
     private fun quote(value: String) = "\"" + value.replace("\"", "\\\"") + "\""
 }
+
+    /**
+     * Version real de **Android System WebView**.
+     *
+     * Es lo primero que hay que mirar cuando una pagina compleja no se pinta. El
+     * README oficial de SpotiDuck documenta "pantalla en blanco" y su remedio es
+     * actualizar el System WebView desde Play Store. Tenerlo a la vista evita
+     * diagnosticar a ciegas.
+     */
+    fun webViewVersion(context: Context): String = runCatching {
+        WebViewCompat.getCurrentWebViewPackage(context)?.let { pkg ->
+            pkg.packageName + " " + (pkg.versionName ?: "?")
+        }
+    }.getOrNull() ?: "desconocida"

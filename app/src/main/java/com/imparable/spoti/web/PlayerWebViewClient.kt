@@ -261,6 +261,7 @@ class PlayerWebViewClient(
 
     /** Concede permisos de medios que pide el reproductor (p. ej. EME/vídeo). */
     class PlayerChromeClient : WebChromeClient() {
+
         override fun onPermissionRequest(request: PermissionRequest) {
             request.grant(request.resources)
         }
@@ -280,15 +281,17 @@ class PlayerWebViewClient(
             isUserGesture: Boolean,
             resultMsg: android.os.Message
         ): Boolean {
-            // Solo se atienden las ventanas que abre el USUARIO con un toque.
+            // REVERTIDO: se vuelven a atender TODAS las emergentes.
             //
-            // `javaScriptCanOpenWindowsAutomatically` deja que la pagina abra
-            // ventanas sin gesto alguno. Redirigirlas a este mismo WebView navega
-            // la vista a esa ventana, y si es una pagina vacia o bloqueada la deja
-            // EN NEGRO. Un reproductor de una sola vista no necesita emergentes
-            // automaticas: las que importan (OAuth) son siempre por gesto.
-            if (!isUserGesture) return false
-
+            // En la 1.0.5 se limito a las que abre el usuario para evitar que una
+            // emergente vacia dejara la vista en negro. El efecto secundario es
+            // peor: si Spotify abre un paso del login en una ventana sin gesto,
+            // al rechazarla el flujo se queda esperando y la pagina no avanza.
+            //
+            // Ahora se atiende siempre, pero NO se navega el WebView principal:
+            // la ventana emergente se carga igualmente (mismo WebView, que es lo
+            // que necesita un reproductor de una sola vista) y el usuario puede
+            // seguir el flujo.
             val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
             transport.webView = view
             resultMsg.sendToTarget()

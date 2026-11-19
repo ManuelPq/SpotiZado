@@ -26,6 +26,17 @@ import com.imparable.spoti.injection.InjectionComposer
 object PlayerWebViewFactory {
 
     const val ALLOWED_ORIGIN = "https://open.spotify.com"
+
+    /**
+     * Origenes que pueden hablar con la app. `accounts.spotify.com` FALTABA: el
+     * puente solo aceptaba `open.spotify.com`, asi que cualquier aviso enviado
+     * desde la pagina de login se descartaba en silencio. Es la pagina donde mas
+     * falta hacia el diagnostico.
+     */
+    private val ALLOWED_ORIGINS = setOf(
+        "https://open.spotify.com",
+        "https://accounts.spotify.com"
+    )
     private const val JS_OBJECT = "SpotiBridge"
 
     /**
@@ -251,7 +262,7 @@ object PlayerWebViewFactory {
             WebViewCompat.addWebMessageListener(
                 webView,
                 JS_OBJECT,
-                setOf(ALLOWED_ORIGIN),
+                ALLOWED_ORIGINS,
                 bridge
             )
         } else {

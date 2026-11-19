@@ -271,6 +271,16 @@ class PlayerBridge(
                 metaViewport = o.optString("metaVp", null),
                 devicePixelRatio = o.optDouble("dpr", 0.0),
                 pageText = o.optString("bodyText", null),
+                nodeCount = o.optInt("nodos"),
+                hasNextData = o.optBoolean("next"),
+                hydrated = o.optBoolean("hidr"),
+                resources = o.optInt("recursos", -1),
+                styleSheets = o.optInt("hojas"),
+                jsErrors = o.optInt("jsErr", -1),
+                jsErrorText = o.optString("jsErr1", null),
+                cspText = o.optString("csp1", null),
+                rejectionText = o.optString("rej1", null),
+                consoleText = o.optString("log1", null),
                 userAgent = o.optString("ua", null),
                 mediaState = o.optString("audio", null)
             )

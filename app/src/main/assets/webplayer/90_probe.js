@@ -52,6 +52,22 @@ JSON.stringify({
     return (Math.round((a.currentTime || 0) * 10) / 10) + 's rs' + (a.readyState || 0)
       + (a.paused ? ' pausado' : ' sonando') + (a.src ? '' : ' sin-src');
   })(),
+  // --- captura de errores de la pagina (70_console.js, document-start) ---
+  // Se leen aqui, desde fuera, porque el canal de vuelta de esta sonda no tiene
+  // restriccion de origen: `evaluateJavascript` devuelve el valor a Kotlin pase
+  // lo que pase. Los paneles dibujados dentro de la pagina no se pintaban.
+  nodos: document.querySelectorAll('*').length,
+  next: !!window.__NEXT_DATA__,
+  hidr: !!(document.querySelector('#__next > *') || document.querySelector('[data-reactroot]')),
+  recursos: (function () {
+    try { return performance.getEntriesByType('resource').length; } catch (e) { return -1; }
+  })(),
+  hojas: (document.styleSheets || []).length,
+  jsErr: (window.__spotiLog ? window.__spotiLog.err.length : -1),
+  jsErr1: (window.__spotiLog && window.__spotiLog.err[0]) || '',
+  csp1: (window.__spotiLog && window.__spotiLog.csp[0]) || '',
+  rej1: (window.__spotiLog && window.__spotiLog.rej[0]) || '',
+  log1: (window.__spotiLog && window.__spotiLog.consola[0]) || '',
   vw: window.innerWidth,
   vh: window.innerHeight,
   scrollW: (document.documentElement && document.documentElement.scrollWidth) || 0,

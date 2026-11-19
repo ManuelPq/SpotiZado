@@ -49,6 +49,15 @@ object DiagnosticReport {
             appendLine()
             appendLine("--- login ---")
             appendLine("campos=${h.inputCount}  pwd=${h.passwordField}  visible=${h.passwordVisible}  boton=${h.submitButton}")
+            appendLine()
+            appendLine("--- por que no se dibuja ---")
+            appendLine("nodos=${h.nodeCount}  next=${h.hasNextData}  hidratado=${h.hydrated}")
+            appendLine("hojas=${h.styleSheets}  recursos=${h.resources}")
+            appendLine("erroresJS=${h.jsErrors}")
+            appendLine("js=${h.jsErrorText ?: "-"}")
+            appendLine("csp=${h.cspText ?: "-"}")
+            appendLine("rechazo=${h.rejectionText ?: "-"}")
+            appendLine("consola=${h.consoleText ?: "-"}")
             appendLine("textoPagina=${(h.pageText ?: "").take(160)}")
             appendLine()
             appendLine("--- reproducción ---")
@@ -74,6 +83,9 @@ object DiagnosticReport {
             "vw=${h.viewportWidth} sw=${h.scrollWidth} zoom=${h.visualScale} " +
             "campos=${h.inputCount} pwd=${if (h.passwordField) "si" else "no"} " +
             "vis=${if (h.passwordVisible) "si" else "no"} " +
-            "modo=${state.settings.guiMode.name} url=${(h.url ?: "-").take(60)}"
+            "modo=${state.settings.guiMode.name} " +
+            "n=${h.nodeCount} nx=${if (h.hasNextData) "si" else "no"} hd=${if (h.hydrated) "si" else "no"} " +
+            "err=${h.jsErrors} " +
+            "url=${(h.url ?: "-").take(44)}"
     }
 }

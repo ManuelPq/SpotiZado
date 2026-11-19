@@ -76,6 +76,26 @@ data class PlayerHealth(
     val devicePixelRatio: Double = 0.0,
     /** Primer texto visible de la pagina: revela mensajes de error de Spotify. */
     val pageText: String? = null,
+    /** Numero de nodos del DOM: 99 = esqueleto sin hidratar, cientos = pagina viva. */
+    val nodeCount: Int = 0,
+    /** Existe `window.__NEXT_DATA__` (Next.js arranco). */
+    val hasNextData: Boolean = false,
+    /** Hay hijos bajo `#__next`: React hidrato. */
+    val hydrated: Boolean = false,
+    /** Peticiones registradas por `performance`. */
+    val resources: Int = 0,
+    /** Hojas de estilo cargadas. */
+    val styleSheets: Int = 0,
+    /** Errores JS capturados (-1 = el capturador no corrio). */
+    val jsErrors: Int = -1,
+    /** Primer error JS, con fichero y linea. */
+    val jsErrorText: String? = null,
+    /** Primera violacion de CSP. */
+    val cspText: String? = null,
+    /** Primera promesa rechazada. */
+    val rejectionText: String? = null,
+    /** Primer console.error. */
+    val consoleText: String? = null,
     /** User-Agent que ve Spotify: revela que reproductor nos esta sirviendo. */
     val userAgent: String? = null,
     /** Estado del medio: «sin medio», o la posicion y el readyState. */

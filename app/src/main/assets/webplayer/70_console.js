@@ -63,50 +63,15 @@
     return ce.apply(console, arguments);
   };
 
-  /** Panel propio, arriba, fuera de la zona de la tarjeta nativa. */
-  function panel() {
-    if (L.panel && L.panel.isConnected) return L.panel;
-    var p = document.createElement('div');
-    p.id = 'spoti-log-panel';
-    p.style.cssText = 'position:fixed;left:0;top:0;right:0;z-index:2147483000;'
-      + 'font:9px/1.3 monospace;padding:3px 6px;white-space:pre-wrap;'
-      + 'background:rgba(0,0,0,.95);color:#ffd400;border-bottom:2px solid #ffd400;'
-      + 'max-height:62vh;overflow:auto;pointer-events:none';
-    document.documentElement.appendChild(p);
-    L.panel = p;
-    return p;
-  }
-
-  function pintar() {
-    if (!document.documentElement) return;
-    var n = document.querySelectorAll('*').length;
-    var hojas = (document.styleSheets || []).length;
-    var res = 0;
-    try { res = performance.getEntriesByType('resource').length; } catch (e) {}
-    var hidratado = !!document.querySelector('#__next > * , [data-reactroot]');
-    var nextData = !!window.__NEXT_DATA__;
-
-    var lineas = [
-      'LOG v1.7.0 nodos=' + n + ' hojas=' + hojas + ' recursos=' + res
-        + ' next=' + (nextData ? 'si' : 'no') + ' hidr=' + (hidratado ? 'si' : 'no'),
-      'err=' + L.err.length + ' rej=' + L.rej.length + ' csp=' + L.csp.length
-        + ' consola=' + L.consola.length
-    ];
-    var todos = L.csp.concat(L.err, L.rej, L.consola).slice(0, 5);
-    for (var i = 0; i < todos.length; i++) lineas.push((i + 1) + ' ' + todos[i]);
-    if (!todos.length) lineas.push('sin errores capturados');
-    panel().textContent = lineas.join('\n');
-  }
-
-  function arrancar() {
-    pintar();
-    var k = 0;
-    var t = setInterval(function () { pintar(); if (++k > 12) clearInterval(t); }, 900);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', arrancar);
-  } else {
-    arrancar();
-  }
+  /*
+   * SIN PANEL. Medido en el dispositivo con la 1.7.0: el panel se veia como una
+   * linea de 2 px sin texto — solo su borde. Dos paneles (este y el de medida)
+   * anclados al mismo `top:0` se solapaban, y su contenido no llegaba a pintarse
+   * porque en `document-start` el <body> aun no existe.
+   *
+   * Se deja de dibujar dentro de la pagina. Los datos se leen desde fuera con
+   * `evaluateJavascript` (90_probe.js) y se muestran en la tarjeta NATIVA, que
+   * sabemos que pinta siempre porque es Compose, no WebView. Ese canal no tiene
+   * restriccion de origen ni depende del arbol de la pagina.
+   */
 })();

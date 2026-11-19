@@ -586,3 +586,36 @@ hace dentro de la app.
   - `next=` — ¿existe `window.__NEXT_DATA__`? Si es `no`, Next.js ni arranco
   - `hidr=` — ¿hay hijos bajo `#__next` o `data-reactroot`? Si es `no`, React no hidrato
 - No modifica la pagina: solo escucha y dibuja un nodo propio fijo.
+
+## [1.8.0]
+
+**El panel dibujado dentro de la pagina no sirve: se ve solo su borde.** Medido en el
+dispositivo con la 1.7.0, el panel salia como una **linea de 2 px sin texto**, y alternaba
+amarillo y verde porque los dos paneles (el de logs y el de medida) estaban anclados al mismo
+`top:0` y se solapaban. El texto no se pintaba: en `document-start` el `<body>` aun no
+existe, y escribir en un nodo colgado de `<html>` antes de que el parser cree el cuerpo no
+acaba de dibujarse.
+
+Se deja de dibujar dentro de la pagina. Los datos se leen **desde fuera**, con
+`evaluateJavascript`, y se muestran en la **tarjeta nativa** —Compose, no WebView—, que
+sabemos que pinta siempre. Ese canal no tiene restriccion de origen ni depende del arbol de
+la pagina.
+
+- **Bug real encontrado de paso**: el puente solo aceptaba el origen `https://open.spotify.com`.
+  Cualquier aviso enviado desde `accounts.spotify.com` —la pagina donde mas falta hacia el
+  diagnostico— **se descartaba en silencio**. Ahora acepta los dos.
+- `90_probe.js` devuelve diez datos nuevos: `nodos`, `next` (`window.__NEXT_DATA__`),
+  `hidr` (hijos bajo `#__next`), `recursos`, `hojas`, `jsErr` y los primeros textos de error
+  JS, CSP, promesa rechazada y `console.error`.
+- `DiagnosticReport` gana el bloque **«por que no se dibuja»** con todo eso, y la linea corta
+  pasa a `n=<nodos> nx=si|no hd=si|no err=<n>`.
+- Sin paneles en la pagina: cero interferencia, y el diagnostico se ve en la tarjeta.
+
+**Como se lee.** Pulsa **Datos** en el aviso y mira el bloque nuevo:
+
+| Dato | Lectura |
+|---|---|
+| `nodos=99  hidratado=no  next=no` | El JS de Spotify **no arranco**: muere antes de hidratar |
+| `js=...` | El mensaje exacto, con fichero y linea |
+| `csp=...` | El CSP de Spotify bloqueando sus propios chunks |
+| `nodos` alto, `hidratado=si`, `err=0` | La pagina vive: el fallo es de pintado puro |

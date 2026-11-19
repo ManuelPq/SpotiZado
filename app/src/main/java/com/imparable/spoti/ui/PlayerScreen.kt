@@ -629,6 +629,33 @@ if (expanded) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            // Bloque que decide: ¿la pagina se construyo y vivio?
+            Text(
+                text = "nodos=" + state.health.nodeCount
+                    + " next=" + (if (state.health.hasNextData) "si" else "no")
+                    + " hidr=" + (if (state.health.hydrated) "si" else "no")
+                    + " hojas=" + state.health.styleSheets
+                    + " rec=" + state.health.resources
+                    + " err=" + state.health.jsErrors,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            listOfNotNull(
+                state.health.jsErrorText?.let { "js=$it" },
+                state.health.cspText?.let { "csp=$it" },
+                state.health.rejectionText?.let { "rechazo=$it" },
+                state.health.consoleText?.let { "consola=$it" }
+            ).forEach { linea ->
+                Text(
+                    text = linea,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             state.health.pageText?.let { t ->
                 Text(
                     text = t,
@@ -675,6 +702,11 @@ if (expanded) {
                                 AssistChip(
                                     onClick = { viewModel.openLoginInBrowser() },
                                     label = { Text("En el navegador") }
+                                )
+                                // Prueba decisiva: ¿pinta este WebView letras?
+                                AssistChip(
+                                    onClick = { viewModel.openTextTest() },
+                                    label = { Text("Probar texto") }
                                 )
                             }
                         }

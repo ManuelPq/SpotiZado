@@ -213,6 +213,43 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
 
     /**
+     * PRUEBA DE TEXTO — la pregunta que queda: ¿este WebView rasteriza glifos?
+     *
+     * Medido en el dispositivo: la pagina de Spotify tiene el texto en el DOM
+     * (`textoPagina` lo devuelve entero), `campos=2`, `pwd=sí`... y en pantalla no
+     * se ve ni una letra. Mientras tanto, el borde de 2 px de un div inyectado SI
+     * se pinta. Bordes si, letras no.
+     *
+     * Esta pagina lo aísla: fondo blanco, titulo enorme, texto suelto, una caja de
+     * color con texto dentro, un borde rojo grueso sin texto y un bloque azul.
+     *
+     *   se ven las cajas y NO las letras  -> fallo de rasterizado de glifos del
+     *                                        motor WebView de este telefono
+     *   se ve todo                        -> el motor pinta; el problema es de la
+     *                                        pagina de Spotify o de su entorno
+     */
+    fun openTextTest() {
+        val view = PlayerHost.webView ?: return
+        val html = """
+            <!doctype html><html><head>
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            </head><body style="margin:0;padding:16px;background:#fff;color:#000;
+            font-family:sans-serif">
+            <h1 style="font-size:44px;margin:0 0 12px">HOLA</h1>
+            <p style="font-size:26px;margin:0 0 12px">Texto de prueba 1 2 3</p>
+            <div style="background:#1ed760;color:#000;padding:18px;font-size:20px;
+            margin-bottom:12px">CAJA VERDE con texto</div>
+            <div style="width:200px;height:60px;border:6px solid #e00;
+            margin-bottom:12px"></div>
+            <div style="width:200px;height:40px;background:#04f"></div>
+            </body></html>
+        """.trimIndent()
+        runCatching {
+            view.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+        }
+    }
+
+    /**
      * Abre el login en el navegador del sistema.
      *
      * No sirve para iniciar sesión dentro de la app (las cookies viven en otro

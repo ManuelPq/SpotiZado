@@ -86,7 +86,15 @@ class InjectionComposer(private val context: Context) {
      * CSS). Solo el puente y una medida de solo lectura que escribe en un panel
      * propio. Si la pagina sigue negra asi, el problema no es nuestro.
      */
-    fun buildLoginScript(): String = if (clean) "" else load(MEASURE)
+    /**
+     * Pagina de login: **nada dibujado por nosotros**.
+     *
+     * El panel de `69_measure` se veia como una linea verde de 2 px sin texto: el
+     * borde se pinta, los glifos no. Los datos ya no se leen de un panel, se leen
+     * desde Kotlin con `evaluateJavascript` (90_probe.js), y se muestran en la
+     * tarjeta nativa.
+     */
+    fun buildLoginScript(): String = ""
 
     /**
      * Captura de errores para `addDocumentStartJavaScript`: se ejecuta ANTES que

@@ -619,3 +619,31 @@ la pagina.
 | `js=...` | El mensaje exacto, con fichero y linea |
 | `csp=...` | El CSP de Spotify bloqueando sus propios chunks |
 | `nodos` alto, `hidratado=si`, `err=0` | La pagina vive: el fallo es de pintado puro |
+
+## [1.9.0]
+
+**Cambio de diagnostico, y por fin con logica.** La tarjeta nativa de la 1.8.0 devolvio esto:
+
+    campos=2 · pwd=sí · visible=no · dpr=2.8125
+    textoPagina = "Iniciar sesión con contraseña Correo electrónico
+                   Contraseña Contraseña oculta Iniciar sesión…"
+
+La pagina **tiene el texto completo en el DOM**. React hidrato. Y en pantalla no se ve **ni una
+letra**… mientras el borde de 2 px de un div nuestro **si se pinta**. Bordes si, glifos no.
+
+Eso reencuadra todo lo anterior: no es que «el contenido no se pinte», es que **no se
+rasterizan los glifos**. Explica los seis sintomas a la vez, incluido el formulario
+«invisible»: sus cajas y bordes pueden estar ahi, pero sin letras no se reconoce nada.
+
+- **Fuera el panel de `69_measure`**: era la linea verde de 2 px. `buildLoginScript()` ya no
+  dibuja nada; los datos van por `evaluateJavascript` a la tarjeta nativa.
+- **La tarjeta Datos** muestra ya el bloque que decide: `nodos`, `next`, `hidr`, `hojas`,
+  `rec`, `err` y las primeras lineas de error JS / CSP / promesa / consola.
+- **Nuevo boton «Probar texto»**: carga una pagina trivial —fondo blanco, `HOLA` a 44 px,
+  texto suelto, una caja verde con texto dentro, un borde rojo grueso sin texto y un bloque
+  azul—. Es la prueba que separa las dos unicas explicaciones que quedan:
+
+| Lo que se vea | Conclusion |
+|---|---|
+| Cajas y bordes **si**, letras **no** | El motor de este telefono no rasteriza glifos: fallo del WebView del sistema |
+| Todo, incluido `HOLA` | El motor pinta; el problema es de la pagina de Spotify o de su entorno |

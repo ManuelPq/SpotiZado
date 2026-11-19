@@ -28,15 +28,32 @@ object PlayerWebViewFactory {
     const val ALLOWED_ORIGIN = "https://open.spotify.com"
     private const val JS_OBJECT = "SpotiBridge"
 
+    /**
+     * User-Agent EXACTO del APK de SpotiDuck v1.2.7 (extraído de su dex).
+     *
+     * Son las cadenas "reducidas" de Chrome: `Android 10; K` en vez del modelo
+     * real del teléfono. No es un detalle cosmético.
+     *
+     * Lo que medimos en el dispositivo con nuestra versión anterior:
+     *   ua=Mozilla/5.0 (Linux; Android 16; 24117RN76E Build/BP2A.250605.031.A3;) ...
+     * Eso es el UA LEGADO, con modelo y número de compilación. Ese formato lo
+     * sirven navegadores antiguos, y Spotify puede responder con su página de
+     * "navegador no compatible" — vacía, que es exactamente la pantalla en negro.
+     *
+     * Chrome lleva desde 2022 enviando el formato reducido por defecto. El motor
+     * WebView de este teléfono devuelve el formato legado, así que hay que
+     * fijarlo a mano. No se puede derivar del real: el real es el que falla.
+     */
     const val UA_DESKTOP =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            "(KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+
+    /** UA móvil: el mismo que usa SpotiDuck. */
+    const val UA_MOBILE =
+        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 " +
+            "(KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36"
 
     /** UA móvil: algunos flujos de login de terceros lo prefieren. */
-    const val UA_MOBILE =
-        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
-
     /**
      * Construye el UA a partir del **motor real** del WebView.
      *
@@ -46,22 +63,16 @@ object PlayerWebViewFactory {
      * se cambia lo justo: se quita la marca `wv` (que delata el WebView) y, en
      * modo escritorio, se sustituye el bloque de plataforma por uno de Windows.
      */
-    fun buildUserAgent(context: Context, desktop: Boolean): String {
-        val real = runCatching { WebSettings.getDefaultUserAgent(context) }
-            .getOrNull()
-            ?.takeIf { it.isNotBlank() }
-            ?: return if (desktop) UA_DESKTOP else UA_MOBILE
-
-        val withoutWv = real.replace(" wv)", ")").replace("; wv", "")
-        if (!desktop) return withoutWv
-
-        var ua = withoutWv
-            .replace(Regex("\\(Linux; Android[^)]*\\)"), "(Windows NT 10.0; Win64; x64)")
-            .replace("Version/4.0 ", "")
-            .replace(" Mobile Safari", " Safari")
-        if (!ua.contains("Chrome/")) ua += " Chrome/140.0.0.0"
-        return ua
-    }
+    /**
+     * Devuelve el UA de SpotiDuck, **sin derivarlo** del motor.
+     *
+     * Antes se partía de `WebSettings.getDefaultUserAgent` y se limpiaba. El
+     * problema es que el UA real de este dispositivo es el formato legado (con
+     * `Build/...`), que es justo el que hay que evitar. Derivar del real era
+     * heredar el fallo.
+     */
+    fun buildUserAgent(context: Context, desktop: Boolean): String =
+        if (desktop) UA_DESKTOP else UA_MOBILE
 
     /**
      * Aplica el perfil de página correcto: **reproductor** o **página normal**

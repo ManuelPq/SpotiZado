@@ -1,5 +1,22 @@
 # Historial de versiones — SpotiZado
 
+## [1.1.1]
+
+Extraído del **dex** del APK de SpotiDuck v1.2.7 (`strings` sobre `classes.dex`). Dos
+diferencias con lo nuestro, las dos en la carga de la página de login:
+
+- **URL**: la suya es
+  `https://accounts.spotify.com/en/login?continue=https%3A%2F%2Fopen.spotify.com%2F`
+  — sin `allow_password` (su `classic_login.js` ya avisaba de que ese parámetro hace que
+  Spotify rechace el login) y **con `continue=`**. Sin destino, Spotify sirve una página
+  vacía: la zona negra.
+
+- **User-Agent fijado a mano**, no derivado del motor. Los suyos son los UA *reducidos* de
+  Chrome (`Android 10; K`). El nuestro salía del WebView real y era el formato **legado**:
+  `Mozilla/5.0 (Linux; Android 16; 24117RN76E Build/BP2A.250605.031.A3;) …`. Ese formato lo
+  sirven navegadores antiguos, y es candidato a que Spotify responda con su página de
+  "navegador no compatible" — vacía. Derivar del UA real era heredar el fallo.
+
 ## [1.1.0]
 
 **El APK de SpotiDuck v1.2.7 (que aporta el usuario) trae los assets en claro, y de

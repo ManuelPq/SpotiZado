@@ -55,7 +55,19 @@ class PlayerWebViewClient(
          *
          * Spotify unificó el login: la página normal ya ofrece email y contraseña.
          */
-        const val URL_LOGIN = "https://accounts.spotify.com/login"
+        /**
+         * URL de login **idéntica** a la del APK de SpotiDuck v1.2.7, extraída de su dex:
+         *
+         *   https://accounts.spotify.com/en/login?continue=https%3A%2F%2Fopen.spotify.com%2F
+         *
+         * Dos diferencias con la nuestra, y las dos importan:
+         *  - Sin `allow_password`. Su propio asset `classic_login.js` advierte de que
+         *    ese parámetro hace que los servidores de auth RECHAZEN el intento.
+         *  - Con `continue=` apuntando al reproductor: sin destino, Spotify sirve una
+         *    pantalla vacía, que es la zona negra que llevamos viendo toda la tarde.
+         */
+        const val URL_LOGIN =
+            "https://accounts.spotify.com/en/login?continue=https%3A%2F%2Fopen.spotify.com%2F"
 
         const val PREFIX_PLAYER = "https://open.spotify.com"
         private const val FACEBOOK_CONSENT = "https://www.facebook.com/privacy/consent/gdp/"

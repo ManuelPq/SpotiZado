@@ -8,18 +8,21 @@ caído, para no repetirlas.
 
 ## 1. Estado, en una línea
 
-App Android (Kotlin + Compose) que envuelve el reproductor web de Spotify. **El login se
-resuelve con `65_unhide.js`**, pero en el dispositivo el contenido de las páginas de Spotify
-**no se pinta** (fondo sí, texto y controles no) mientras que el mismo HTML en Chrome sí.
-Última versión: **1.0.11** (`versionCode 26`).
+App Android (Kotlin + Compose) que envuelve el reproductor web de Spotify. Última versión:
+**1.1.0** (`versionCode 27`).
+
+**CAUSA DEL LOGIN EN NEGRO, ENCONTRADA**: `?allow_password=1` en la URL de login. Los
+servidores de autenticación de Spotify **rechazan** esa petición y sirven la página vacía.
+Estaba ahí desde la 0.1.7 y costó media docena de versiones. Ver `docs/NOTAS-v1.1.0.md`.
 
 | Pieza | Estado |
 |---|---|
 | Compilación | Funciona. Receta en `docs/NOTAS-BUILD.md` |
-| Login | **Resuelto**: la reparación de la cadena de ancestros hace aparecer el formulario |
-| WebView (login y reproductor) | **No pinta** el contenido de Spotify. Causa sin confirmar |
+| Login | **Causa raíz corregida en 1.1.0** (quitar `allow_password`). Pendiente de verificar en dispositivo |
+| WebView | Los "arreglos" de renderizado de la 1.0.10 atacaban un síntoma. El origen era el parámetro |
 | Reproducción | Suena en modo Móvil |
-| Bloqueo de anuncios | Listas cargadas (1.316 reglas + 26 en lista blanca). Neutralización **sin verificar** |
+| Bloqueo de anuncios | **Nueva capa por `file_id`** (1.1.0): `25_adstate.js` + `AdIdStore` + intercept. Sin verificar en dispositivo |
+| Widevine | CDM compartido (límite de 16 sesiones hardware). Sin verificar |
 | Widget, temporizadores, exportar | Implementados, sin verificar |
 
 ---
@@ -37,7 +40,26 @@ resuelve con `65_unhide.js`**, pero en el dispositivo el contenido de las págin
 
 ---
 
-## 3. Trampas ya pagadas (no repetirlas)
+## 3. La arquitectura del bloqueo (ya decidida)
+
+El bloqueo por **host** no puede quitar anuncios: el audio publicitario se sirve desde los
+mismos hosts CDN que la música. La vía que sí funciona, implementada en 1.1.0:
+
+```
+25_adstate.js  → envuelve fetch y WebSocket, lee los state_machine
+               → pistas con content_type = AD → sus file_ids
+               → spotiNotify('adids', ...)
+AdIdStore.kt   → cola acotada (64) de IDs
+shouldInterceptRequest → corta ESA petición concreta (204)
+```
+
+Capa independiente del bloqueo por host. La respuesta de `fetch` se devuelve intacta.
+
+**Origen**: el APK de SpotiDuck v1.2.7 trae los assets en claro (`ad_state_hook.js`,
+`desktop_spoof.js`, `css_hacks.css`, `spotify_bridge.js`). **No se copia código** —su licencia
+no está publicada—; se toma la arquitectura y se reimplementa, citando el origen.
+
+## 4. Trampas ya pagadas (no repetirlas)
 
 Cada una costó al menos una versión. Todas se detectaron midiendo, no razonando.
 
@@ -50,13 +72,14 @@ Cada una costó al menos una versión. Todas se detectaron midiendo, no razonand
 | Medir la cadena de estilos solo hasta `<form>` | El culpable estaba **más arriba**: `opacity` no se hereda, así que el hijo dice `op=1`. Hay que ir hasta `<html>` |
 | Limitar las ventanas emergentes a las de gesto (v1.0.5) | Si Spotify abre un paso del login sin gesto, al rechazarla el flujo se queda esperando. Revertido en 1.0.10 |
 | Interpretar capturas a ciegas | Cada foto responde a una pregunta. De ahí `95_calib.js`, el modo limpio y el informe en texto |
+| `?allow_password=1` en la URL de login | **Costó media docena de versiones.** Los servidores de auth de Spotify rechazan esa petición y sirven la página vacía. La pista estaba en el `classic_login.js` de SpotiDuck desde el principio |
 
 **Reglas que salieron de ahí**: una versión = un cambio · ningún cambio sin medida · no
 reescribir lo que funciona · decir "no verificado" en vez de "debería funcionar".
 
 ---
 
-## 4. Cómo se compila
+## 5. Cómo se compila
 
 ```bash
 cd ~/workspace/imp/SpotiZado
@@ -71,7 +94,7 @@ API 37) está en `docs/NOTAS-BUILD.md`. Esto es lo primero que hay que comprobar
 
 ---
 
-## 5. Dónde está todo
+## 6. Dónde está todo
 
 | Qué | Dónde |
 |---|---|
@@ -84,7 +107,7 @@ API 37) está en `docs/NOTAS-BUILD.md`. Esto es lo primero que hay que comprobar
 
 ---
 
-## 6. Objetivo del proyecto
+## 7. Objetivo del proyecto
 
 Quitar los anuncios combinando lo mejor de **Spotifuck** (andamiaje del reproductor web) y
 **SpotiDuck** (listas de bloqueo y sus advertencias), reimplementado desde cero.

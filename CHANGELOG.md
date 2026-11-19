@@ -566,3 +566,23 @@ cruzadas=2`. Las 2 hojas «cruzadas» son las de `accounts.scdn.co`: **sí llega
 no serían hojas), solo que su `cssRules` no es legible por origen. Y 99 nodos es poco para
 una página de Next.js ya hidratada, así que la pregunta abierta es si el JS de Spotify está
 corriendo.
+
+## [1.7.0]
+
+**La pagina se cuenta a si misma por que no se dibuja.** El USB no coopera —el dispositivo no
+aparece en `chrome://inspect` con la depuracion activada—, asi que la captura de errores se
+hace dentro de la app.
+
+- Nuevo `70_console.js`, registrado con **`WebViewCompat.addDocumentStartJavaScript`**: corre
+  **antes** que cualquier script de Spotify. Es la unica forma de ver los errores del
+  arranque; inyectando al terminar la carga (`onPageFinished`) los primeros ya habrian
+  pasado, y son justo los que interesan.
+- Escucha cuatro fuentes: `window.onerror` (incluidos **errores de carga de recursos**, con
+  el nombre del fichero), `unhandledrejection`, `securitypolicyviolation` (CSP) y
+  `console.error`. Guarda los 12 primeros de cada una; en pantalla muestra 5.
+- El panel va **arriba** (la tarjeta nativa ocupa el tercio inferior y tapaba el panel de la
+  1.6.x) y anade tres datos que antes no teniamos:
+  - `recursos=` — peticiones registradas por `performance`, dice si los chunks salen de red
+  - `next=` — ¿existe `window.__NEXT_DATA__`? Si es `no`, Next.js ni arranco
+  - `hidr=` — ¿hay hijos bajo `#__next` o `data-reactroot`? Si es `no`, React no hidrato
+- No modifica la pagina: solo escucha y dibuja un nodo propio fijo.

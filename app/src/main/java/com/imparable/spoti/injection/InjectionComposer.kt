@@ -42,6 +42,7 @@ class InjectionComposer(private val context: Context) {
         const val WITNESS = DIR + "67_witness.js"
         const val UI = DIR + "68_ui.js"
         const val MEASURE = DIR + "69_measure.js"
+        const val CONSOLE = DIR + "70_console.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
         @Volatile
@@ -85,8 +86,14 @@ class InjectionComposer(private val context: Context) {
      * CSS). Solo el puente y una medida de solo lectura que escribe en un panel
      * propio. Si la pagina sigue negra asi, el problema no es nuestro.
      */
-    fun buildLoginScript(): String = if (clean) "" else
-        load(HOST_BRIDGE) + load(MEASURE)
+    fun buildLoginScript(): String = if (clean) "" else load(MEASURE)
+
+    /**
+     * Captura de errores para `addDocumentStartJavaScript`: se ejecuta ANTES que
+     * cualquier script de la pagina, que es la unica forma de ver por que muere
+     * el arranque de Next.js. No modifica nada: solo escucha y dibuja su panel.
+     */
+    fun buildConsoleScript(): String = if (clean) "" else load(CONSOLE)
 
     fun buildProbeScript(): String = if (clean) "" else load(PROBE)
 

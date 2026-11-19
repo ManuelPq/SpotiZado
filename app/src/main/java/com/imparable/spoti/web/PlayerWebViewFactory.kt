@@ -205,6 +205,22 @@ object PlayerWebViewFactory {
             WebView.setWebContentsDebuggingEnabled(true)
         }
 
+        // CAPTURA DE ERRORES DESDE EL PRIMER BYTE.
+        //
+        // `addDocumentStartJavaScript` ejecuta el script ANTES que cualquier
+        // script de la pagina. Es la unica forma de ver los errores del arranque
+        // de Next.js; inyectando al terminar la carga (onPageFinished) ya habrian
+        // pasado, y son justo los que interesan: si el JS de Spotify muere al
+        // empezar, el sintoma es exactamente el que tenemos — esqueleto HTML de
+        // 99 nodos, CSS aplicado y nada construido encima.
+        //
+        // El panel solo se dibuja en la pagina de login (el propio script lo
+        // coloca en un nodo fijo); en el reproductor no aparece porque el script
+        // no dibuja hasta que hay documento, y se retira con `removeDocumentStart`.
+        if (!desktopMode) {
+            installErrorCapture(webView, bridge.composer)
+        }
+
         webView.setBackgroundColor(0xFF121212.toInt())
         webView.isScrollbarFadingEnabled = true
 
@@ -255,6 +271,13 @@ object PlayerWebViewFactory {
         )
 
         return webView
+    }
+
+    private fun installErrorCapture(webView: WebView, composer: InjectionComposer) {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) return
+        val js = composer.buildConsoleScript()
+        if (js.isBlank()) return
+        runCatching { WebViewCompat.addDocumentStartJavaScript(webView, js, setOf("*")) }
     }
 
     /** Inyecta el conjunto de scripts iniciales. */

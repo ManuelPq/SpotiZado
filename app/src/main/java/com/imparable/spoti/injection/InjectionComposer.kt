@@ -35,6 +35,7 @@ class InjectionComposer(private val context: Context) {
         const val LOGIN = DIR + "60_login.js"
         const val PROBE = DIR + "90_probe.js"
         const val CALIB = DIR + "95_calib.js"
+        const val AD_STATE = DIR + "25_adstate.js"
         const val UNHIDE = DIR + "65_unhide.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
@@ -87,6 +88,8 @@ class InjectionComposer(private val context: Context) {
     /** Script de arranque: puente, comandos y tema, antes de tener el reproductor. */
     fun buildBootScript(): String = if (clean) "" else buildString {
         append(load(HOST_BRIDGE))
+        // Captura de IDs de anuncio: cuanto antes entre, antes empieza a observar.
+        append(load(AD_STATE))
         append(load(STATE))
         append(load(CONTROL))
         append(load(CONNECT))
@@ -102,6 +105,7 @@ class InjectionComposer(private val context: Context) {
      */
     fun buildPlayerScript(): String = if (clean) "" else buildString {
         append(load(HOST_BRIDGE))
+        append(load(AD_STATE))
         append(load(STATE))
         append(load(CONTROL))
         append(load(CONNECT))

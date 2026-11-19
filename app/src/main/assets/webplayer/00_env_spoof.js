@@ -33,6 +33,43 @@
   g(window.navigator, 'maxTouchPoints', 0);
 
   /*
+   * WIDEVINE: una sola sesion de CDM compartida.
+   *
+   * Insight de SpotiDuck (asset `desktop_spoof.js`, SECTION 0): el CDM hardware de
+   * Qualcomm limita a 16 las sesiones concurrentes (OEMCrypto_Open devuelve
+   * ERROR_DRM_RESOURCE_BUSY). El reproductor de Spotify precarga 16-20 pistas al
+   * abrir una lista, y cada una pide su MediaKeys sin cerrarla -> se agota el
+   * limite y aparece "Spotify no puede reproducir esto ahora".
+   *
+   * Compartir una unica instancia de MediaKeys baja las sesiones hardware a 1 y
+   * evita ese error. No cambia nada visible: solo reutiliza el CDM.
+   */
+  try {
+    if (navigator && navigator.requestMediaKeySystemAccess) {
+      var origRMKSA = navigator.requestMediaKeySystemAccess.bind(navigator);
+      var sharedKeys = null;
+      navigator.requestMediaKeySystemAccess = function (system, configs) {
+        return origRMKSA(system, configs).then(function (access) {
+          if (system && system.indexOf('widevine') !== -1) {
+            var origCreate = access.createMediaKeys.bind(access);
+            access.createMediaKeys = function () {
+              if (!sharedKeys) {
+                sharedKeys = origCreate().catch(function (err) {
+                  sharedKeys = null;
+                  throw err;
+                });
+              }
+              return sharedKeys;
+            };
+          }
+          return access;
+        });
+      };
+      window.__spotiWidevinePool = 1;
+    }
+  } catch (err) {}
+
+  /*
    * VIEWPORT: se fija al ANCHO REAL del dispositivo.
    *
    * Antes se forzaba `width=1920`. Medido en el dispositivo con la 1.0.2:

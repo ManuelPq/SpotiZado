@@ -42,7 +42,20 @@ class PlayerWebViewClient(
          * selector único y frágil (`section>div>div>div>div>a:first-child`): si Spotify
          * cambiaba el marcado, el usuario se quedaba sin forma de entrar.
          */
-        const val URL_LOGIN = "https://accounts.spotify.com/login?allow_password=1"
+        /**
+         * Página de login.
+         *
+         * SIN `allow_password=1`. Ese parámetro se añadió en la 0.1.7 creyendo que
+         * era imprescindible para que apareciera el formulario, y es justo lo
+         * contrario: el asset `classic_login.js` del APK de SpotiDuck lo dice
+         * literalmente — «Legacy `allow_password` URL parameters cause Spotify
+         * auth servers to REJECT login attempts». Los servidores de autenticación
+         * de Spotify rechazan la petición, la página se sirve vacía y por eso el
+         * visor queda en negro aunque el DOM tenga los dos campos (`campos=2`).
+         *
+         * Spotify unificó el login: la página normal ya ofrece email y contraseña.
+         */
+        const val URL_LOGIN = "https://accounts.spotify.com/login"
 
         const val PREFIX_PLAYER = "https://open.spotify.com"
         private const val FACEBOOK_CONSENT = "https://www.facebook.com/privacy/consent/gdp/"
@@ -219,6 +232,28 @@ class PlayerWebViewClient(
     }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        val uri = request.url
+
+        // ---- CAPA NUEVA: audio de anuncio por file_id -----------------------
+        //
+        // Es la pieza que de verdad quita los anuncios. El audio publicitario se
+        // sirve desde los MISMOS hosts que la música, así que por URL de host no
+        // se distingue y bloquear el host se lleva por delante la música.
+        //
+        // Aquí se compara contra los `file_id` que `25_adstate.js` ha capturado
+        // del estado del reproductor (pistas con `content_type: 'AD'`). Solo se
+        // corta ESA petición concreta.
+        //
+        // Se hace ANTES del filtro por host y sin depender de que el bloqueo de
+        // red esté activo: son dos capas independientes.
+        if (onPlayerPage && com.imparable.spoti.adblock.AdIdStore.matches(uri.toString())) {
+            Log.d(TAG, "Audio de anuncio cortado: ${uri.path}")
+            return WebResourceResponse(
+                "audio/mpeg", null, 204, "Ad audio blocked", emptyMap(),
+                ByteArrayInputStream(ByteArray(0))
+            )
+        }
+
         val blocker = adBlocker ?: return null
 
         // El bloqueo de red actúa **solo** en el reproductor.
@@ -230,7 +265,6 @@ class PlayerWebViewClient(
         // el formulario nunca aparece: el síntoma exacto que se reportó.
         if (!onPlayerPage) return null
 
-        val uri: Uri = request.url
         if (!blocker.shouldBlock(uri.host)) return null
 
         Log.d(TAG, "Bloqueado: ${uri.host}${uri.path}")

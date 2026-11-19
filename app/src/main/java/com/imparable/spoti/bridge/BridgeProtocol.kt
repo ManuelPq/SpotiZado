@@ -54,7 +54,8 @@ object BridgeProtocol {
     ) {
         @Serializable
         data class Params(
-            // estado del reproductor
+            val ids: List<String> = emptyList(),
+        // estado del reproductor
             val track: String? = null,
             val artist: String? = null,
             val album: String? = null,
@@ -94,6 +95,7 @@ object BridgeProtocol {
 
     /** Eventos que el JavaScript puede enviar. */
     object Method {
+        const val AD_IDS = "adids"
         const val STATE = "event.state"
         const val POSITION = "event.position"
         const val AD_GUARD = "event.adguard"

@@ -108,9 +108,24 @@ class PlayerBridge(
             BridgeProtocol.Method.QUEUE -> handleQueue(incoming)
             BridgeProtocol.Method.RELOAD -> onNeedsReload(incoming.params.reason ?: "playback-stalled")
             BridgeProtocol.Method.LOGIN -> handleLogin(incoming)
+            BridgeProtocol.Method.AD_IDS -> handleAdIds(incoming)
             BridgeProtocol.Method.DEVICE -> Log.d(TAG, "device_id=${incoming.params.deviceId}")
             else -> Log.d(TAG, "método no manejado: ${incoming.method}")
         }
+    }
+
+    /**
+     * IDs de audio publicitario capturados por `25_adstate.js`.
+     *
+     * El JS lee el estado del reproductor y manda aquí los `file_id` de las pistas
+     * marcadas como anuncio. Se guardan en [AdIdStore] y la capa nativa corta esas
+     * peticiones concretas en `shouldInterceptRequest`.
+     */
+    private fun handleAdIds(msg: BridgeProtocol.Incoming) {
+        val ids = msg.params.ids
+        if (ids.isEmpty()) return
+        com.imparable.spoti.adblock.AdIdStore.record(ids)
+        Log.d(TAG, "adids=${ids.size} (acumulado=${com.imparable.spoti.adblock.AdIdStore.snapshot().size})")
     }
 
     private fun handleState(msg: BridgeProtocol.Incoming) {

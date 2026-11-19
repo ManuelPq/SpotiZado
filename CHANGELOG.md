@@ -1,5 +1,34 @@
 # Historial de versiones — SpotiZado
 
+## [1.1.0]
+
+**El APK de SpotiDuck v1.2.7 (que aporta el usuario) trae los assets en claro, y de
+ahí salen las dos piezas que faltaban.** No se copia código: la app tiene su licencia
+sin publicar, así que se reimplementa a partir de la arquitectura observada.
+
+- **BUG DEL LOGIN, encontrado.** Su asset `classic_login.js` dice literalmente:
+  «Legacy `allow_password` URL parameters cause Spotify auth servers to REJECT login
+  attempts». Nuestra `URL_LOGIN` llevaba `?allow_password=1` **desde la 0.1.7** — los
+  servidores de autenticación rechazan la petición, la página se sirve vacía y por eso
+  el visor quedaba en negro con los campos en el DOM (`campos=2`). Parámetro eliminado.
+
+- **Bloqueo de anuncios por `file_id`, no por host.** El audio publicitario se sirve
+  desde los mismos hosts CDN que la música: por URL no se distingue, y bloquear el host
+  se lleva la música por delante. La solución observada: leer el `state_machine`, quedarse
+  con los `file_ids` de las pistas con `content_type: AD`, y cortar ESA petición concreta.
+
+  - `25_adstate.js`: envuelve `fetch` y `WebSocket`, lee los `state_machine`, extrae los
+    `file_ids` y los manda al nativo. La respuesta original se devuelve intacta.
+  - `AdIdStore.kt`: cola acotada de IDs + `matches(url)`.
+  - `shouldInterceptRequest`: corta solo las peticiones de esos IDs, en una capa
+    independiente del bloqueo por host.
+
+- **Widevine: una sola sesión de CDM compartida.** El `desktop_spoof.js` de SpotiDuck
+  documenta que el CDM hardware de Qualcomm limita a 16 sesiones concurrentes y que el
+  reproductor precarga 16-20 pistas, cada una pidiendo su `MediaKeys` sin cerrarla
+  (`ERROR_DRM_RESOURCE_BUSY` → «Spotify no puede reproducir esto ahora»). Compartir una
+  instancia baja las sesiones hardware a 1.
+
 ## [1.0.11]
 
 - **Informe de diagnóstico en TEXTO** (Diagnóstico → "Copiar informe"). Una pulsación copia

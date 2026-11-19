@@ -474,3 +474,40 @@ y una amarilla (C):
 - Se ven **solo C** (o C y B) → confirmado: la capa principal no compone. El renderizado
   software de esta version deberia arreglarlo; si no, el problema es de driver y la salida
   es otra.
+
+## [1.5.0]
+
+**El testigo cerro una puerta y abrio otra.** Medido en el dispositivo con la 1.4.0:
+
+    A estatico  -> SE VE
+    B absoluto  -> SE VE
+    C fijo      -> SE VE
+
+Las tres. El documento pinta, el motor pinta, la composicion de capas no tiene nada
+roto. Y debajo de las franjas, negro absoluto con `campos=2 · pwd=sí`. Asi que el
+problema **no** es que la capa principal no componga: era mi hipotesis y queda descartada.
+
+(Correccion de un dato que venia arrastrando: `visible=sí` **no** prueba que el campo se
+vea. La sonda solo comprobaba su rectangulo contra la ventana — geometria, no visibilidad.
+Lei ese campo como si fuera una prueba de pintado y no lo era.)
+
+**La diferencia que queda entre nuestros nodos y los de Spotify** es de donde sale su
+pintado: los nuestros llevan **estilos en linea** (`style="..."`), los de Spotify dependen
+de **sus hojas de estilo**, servidas desde `accounts.scdn.co` (comprobado en el HTML real
+de la pagina, con el UA de este telefono).
+
+Si esas hojas no se aplican, la pagina queda **sin estilos**: fondo transparente (se ve el
+`#121212` que pusimos al WebView) y texto por defecto **negro**. Texto negro sobre fondo
+negro. Y los campos de un formulario sin estilos, con ese fondo, tampoco se ven.
+
+- Nuevo `68_ui.js`: mide si la pagina esta **estilada** — numero de hojas, reglas
+  legibles, fondo y color calculados del `body`, `display` y `opacity` del `form`, estado
+  de `document.fonts`, numero de nodos. Distingue «sin CSS» de «CSS aplicado pero oculto»,
+  que son problemas opuestos y llevabamos toda la tarde tratandolos igual.
+- Si no hay estilos (o el cuerpo sale transparente), inyecta un **CSS de respaldo** que
+  hace legible el formulario: fondo oscuro, texto blanco, campos con borde y 44 px de alto,
+  botones verdes. No pisa nada cuando el CSS de Spotify si esta.
+- Saca el resultado en un **panel fijo** abajo. Nuestros elementos fijos se pintan (esta
+  medido), asi que el panel es un canal fiable aunque la pagina este negra.
+- Se retiran `66_stack.js` y `67_witness.js` del login: ya dieron su respuesta y solo
+  añadian ruido.

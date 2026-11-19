@@ -57,6 +57,14 @@ JSON.stringify({
   // restriccion de origen: `evaluateJavascript` devuelve el valor a Kotlin pase
   // lo que pase. Los paneles dibujados dentro de la pagina no se pintaban.
   nodos: document.querySelectorAll('*').length,
+  // --- capa de pintado (71_paint.js): opacidad, animaciones, contencion ---
+  pOp: (window.__spotiPaint && window.__spotiPaint.antes.op) || '-',
+  pNextOp: (window.__spotiPaint && window.__spotiPaint.antes.nextOp) || '-',
+  pAnim: (window.__spotiPaint && window.__spotiPaint.antes.animaciones) || -1,
+  pCv: (window.__spotiPaint && window.__spotiPaint.antes.contentVis) || '-',
+  pCentro: (window.__spotiPaint && window.__spotiPaint.antes.centro) || '-',
+  pSosp: (window.__spotiPaint && window.__spotiPaint.antes.sospechosos) || '',
+  pVer: (window.__spotiPaint && window.__spotiPaint.veredicto) || 'sin ejecutar',
   next: !!window.__NEXT_DATA__,
   hidr: !!(document.querySelector('#__next > *') || document.querySelector('[data-reactroot]')),
   recursos: (function () {

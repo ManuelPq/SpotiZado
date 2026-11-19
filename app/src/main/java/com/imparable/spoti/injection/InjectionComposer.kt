@@ -43,6 +43,7 @@ class InjectionComposer(private val context: Context) {
         const val UI = DIR + "68_ui.js"
         const val MEASURE = DIR + "69_measure.js"
         const val CONSOLE = DIR + "70_console.js"
+        const val PAINT = DIR + "71_paint.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
         @Volatile
@@ -94,7 +95,7 @@ class InjectionComposer(private val context: Context) {
      * desde Kotlin con `evaluateJavascript` (90_probe.js), y se muestran en la
      * tarjeta nativa.
      */
-    fun buildLoginScript(): String = ""
+    fun buildLoginScript(): String = if (clean) "" else load(PAINT)
 
     /**
      * Captura de errores para `addDocumentStartJavaScript`: se ejecuta ANTES que

@@ -76,6 +76,20 @@ data class PlayerHealth(
     val devicePixelRatio: Double = 0.0,
     /** Primer texto visible de la pagina: revela mensajes de error de Spotify. */
     val pageText: String? = null,
+    /** Opacidad calculada de `body` (menos de 1 = subarbol oculto). */
+    val bodyOpacity: String? = null,
+    /** Opacidad de `#__next`. */
+    val nextOpacity: String? = null,
+    /** Animaciones en el arbol y cuantas corren (formato `total/corriendo`). */
+    val animations: String? = null,
+    /** `content-visibility` de `#__next`. */
+    val contentVisibility: String? = null,
+    /** Quien esta arriba en el centro de la pantalla. */
+    val centerElement: String? = null,
+    /** Elementos de la cadena con opacidad<1, content-visibility o contain. */
+    val paintSuspects: String? = null,
+    /** Veredicto de la reparacion de pintado. */
+    val paintVerdict: String? = null,
     /** Numero de nodos del DOM: 99 = esqueleto sin hidratar, cientos = pagina viva. */
     val nodeCount: Int = 0,
     /** Existe `window.__NEXT_DATA__` (Next.js arranco). */

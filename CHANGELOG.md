@@ -1,5 +1,31 @@
 # Historial de versiones — SpotiZado
 
+## [1.10.0]
+
+**El motor pinta: probado.** La prueba de texto (`HOLA` 44 px, párrafo, caja verde con texto
+dentro, borde rojo, bloque azul) se ve **entera** en el WebView del teléfono. Queda descartado
+el rasterizado de glifos, que era la hipótesis de la 1.9.0.
+
+**Y la página de Spotify está viva:** `nodos=98 next=si hidr=si hojas=5 rec=27 err=0`, con el
+texto completo en el DOM («¡Hola de nuevo! Correo electrónico Continuar…»). Única violación de
+CSP: `script-src wasm-eval`, del propio Spotify, inocua para pintar.
+
+Entonces el subárbol existe, tiene texto, y el motor decide no dibujarlo. Quedan tres modos, y
+los tres son la misma familia:
+
+1. **Opacidad animada congelada** — el login entra con una animación de opacidad; si las
+   animaciones no avanzan el elemento se queda en `opacity: 0` para siempre.
+2. **`content-visibility: hidden/auto`** — el motor mide pero salta el pintado.
+3. **`contain: paint/size`** con altura 0 — recorta a nada.
+
+- Nuevo `71_paint.js`: **mide y repara**. Mide `opacity` de `body` y `#__next`, animaciones
+  totales/en curso, `content-visibility`, `contain`, el elemento del centro de la pantalla y la
+  cadena de sospechosos; aplica una reparación que cubre los tres modos (animaciones a duración
+  ~0 con `fill-mode: forwards`, `content-visibility: visible`, `contain: none`, opacidad 1 en
+  `html/body/#__next/main`); y vuelve a medir para dar un **veredicto**.
+- La tarjeta **Datos** gana `op=`, `nextOp=`, `anim=`, `cv=`, `centro=`, veredicto y sospechosos.
+- `DiagnosticReport` incluye el mismo bloque.
+
 ## [1.3.0]
 
 **Hipotesis nueva, y con la prueba al lado.** Con la 1.2.1 el login clasico ya informa

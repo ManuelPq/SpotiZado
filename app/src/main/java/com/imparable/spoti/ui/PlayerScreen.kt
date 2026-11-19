@@ -629,6 +629,34 @@ if (expanded) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            // Capa de pintado: opacidad, animaciones y contencion.
+            Text(
+                text = "op=" + (state.health.bodyOpacity ?: "-")
+                    + " nextOp=" + (state.health.nextOpacity ?: "-")
+                    + " anim=" + (state.health.animations ?: "-")
+                    + " cv=" + (state.health.contentVisibility ?: "-"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "centro=" + (state.health.centerElement ?: "-")
+                    + " | " + (state.health.paintVerdict ?: "-"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            state.health.paintSuspects?.takeIf { it.isNotBlank() }?.let { s ->
+                Text(
+                    text = "sosp=" + s,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             // Bloque que decide: ¿la pagina se construyo y vivio?
             Text(
                 text = "nodos=" + state.health.nodeCount

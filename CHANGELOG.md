@@ -436,3 +436,41 @@ reproductor (antes dependía de un único botón). Aviso descartable con acción
 ## 0.1.0 — 2026-10-15
 Primera compilación. Cadena montada desde cero: Gradle 9.8.1, AGP 9.4.1, Kotlin 2.4.21,
 JDK Temurin 21, SDK 36.
+
+## [1.4.0]
+
+**Se acabo suponer: hay un testigo que dice donde se muere el pixel.**
+
+Estado real con la 1.3.0, medido en el dispositivo: `campos=2 · pwd=sí · visible=sí ·
+zoom=1.0` y la pantalla negra. Ademas comprobe en el **servidor**, con el UA de este
+telefono, que la pagina que sirve Spotify es HTML plano: un `<form>`, un
+`<input id="username">`, cero `content-visibility`, cero `contain`, cero `@layer`, cero
+`color-mix`, cero `backdrop-filter`. No hay nada raro que el WebView no sepa pintar.
+
+Lo que si se pinta es lo que inyectamos con `position:fixed` + `z-index:2147483000`. Y ahi
+esta la pista que nunca se siguio: `position:fixed` con z-index alto obliga al motor a
+crear una **capa de composicion propia**, mientras el contenido de la pagina vive en la
+**capa principal** del documento. Si la principal no compone, se ve exactamente lo que
+tenemos: fondos y capas propias si, texto y controles no.
+
+Por eso la 1.4.0 va en la direccion contraria a todo lo probado:
+
+- **La capa de pintado depende de la pagina.** Fuera del reproductor (login,
+  consentimiento, redirecciones) se usa `LAYER_TYPE_SOFTWARE` — rasteriza en CPU y no
+  depende del compositor de GPU. El reproductor mantiene `LAYER_TYPE_HARDWARE`. Hasta
+  ahora estaba fijada `HARDWARE` para todo, en `create()`, y esa linea pisaba cualquier
+  cambio de perfil: por eso nunca se habia probado.
+- Nuevo `67_witness.js`: tres franjas identicas salvo el nivel de pintado —
+  **A** en flujo normal (capa principal), **B** en `absolute` z-index 5, **C** en `fixed`
+  z-index 10 (capa propia). Solo diagnostico, se quita en cuanto sepamos la respuesta.
+- `67_witness.js` neutraliza tambien `content-visibility` y `contain` en la cadena del
+  campo, los dos unicos modos de "mide pero no rasterices" que `65_unhide.js` no cubria.
+
+**Como se lee el testigo.** Al abrir el login, arriba sale una banda roja (A), una azul (B)
+y una amarilla (C):
+
+- Se ven **A, B y C** → el documento pinta. El fallo es oclusion o subarbol no pintado, y
+  el siguiente paso es `chrome://inspect` por USB.
+- Se ven **solo C** (o C y B) → confirmado: la capa principal no compone. El renderizado
+  software de esta version deberia arreglarlo; si no, el problema es de driver y la salida
+  es otra.

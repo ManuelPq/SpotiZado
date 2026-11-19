@@ -118,6 +118,32 @@ object PlayerWebViewFactory {
         // `useWideViewPort` y `loadWithOverviewMode`. El cliente que SÍ funciona
         // en este teléfono no la invoca en ningún momento.
 
+        // CAPA DE PINTADO: la prueba que faltaba, y va en la direccion contraria.
+        //
+        // Medido en el dispositivo: con LAYER_TYPE_HARDWARE puesto para TODO,
+        // el fondo del documento y los elementos con `position:fixed` y z-index
+        // alto SI se pintan; el contenido de Spotify (texto, campos, imagenes)
+        // NO, aunque su geometria es correcta y el HTML servido es plano.
+        //
+        // Que lo nuestro se pinte y lo suyo no descarta CSS, DOM y viewport: la
+        // diferencia entre unos y otros es *el nivel de pintado*. `position:fixed`
+        // con z-index alto crea capa de composicion propia; el contenido normal
+        // va en la capa principal del documento. Si la principal no compone, el
+        // resultado es exactamente lo que se ve: fondos y capas propias si, resto
+        // no.
+        //
+        // Nadie habia probado lo contrario: renderizado SOFTWARE, que rasteriza
+        // en CPU y no depende del compositor de GPU. Se aplica SOLO a las paginas
+        // que no son el reproductor (login, consentimiento, redirecciones): ahi
+        // no hay video ni DRM que perder, y el coste es irrelevante para un
+        // formulario. El reproductor mantiene HARDWARE.
+        val layer = if (desktop) {
+            android.view.View.LAYER_TYPE_HARDWARE
+        } else {
+            android.view.View.LAYER_TYPE_SOFTWARE
+        }
+        runCatching { webView.setLayerType(layer, null) }
+
         // Cookies de terceros: el login y el reproductor las necesitan (el flujo
         // de accounts.spotify.com deja cookies para open.spotify.com). El cliente
         // que funciona las acepta explícitamente y nosotros no las tocábamos.
@@ -192,7 +218,9 @@ object PlayerWebViewFactory {
          *   3. desactivar el "wide viewport" solo en paginas no-reproductor, que
          *      es donde el escalado automatico peleaba con el CSS.
          */
-        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        // La capa de pintado la decide `applyProfile` segun la pagina: SOFTWARE
+        // fuera del reproductor, HARDWARE dentro. Fijarla aqui a HARDWARE para
+        // todo era justo lo que impedia probar la alternativa.
         with(webView.settings) {
             runCatching { setOffscreenPreRaster(true) }
         }

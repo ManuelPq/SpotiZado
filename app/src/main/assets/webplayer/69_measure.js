@@ -81,10 +81,14 @@
     if (!p) {
       p = document.createElement('div');
       p.id = PANEL;
-      p.style.cssText = 'position:fixed;left:0;bottom:0;right:0;z-index:2147483000;'
-        + 'font:10px/1.4 monospace;padding:5px 8px;white-space:pre-wrap;'
-        + 'background:rgba(0,0,0,.9);color:#00ffb3;border-top:2px solid #00ffb3;'
-        + 'max-height:46vh;overflow:auto';
+      // ARRIBA, no abajo: el panel de la 1.6.0 salia recortado porque NUESTRA
+      // propia tarjeta (Compose, capa nativa) ocupa el tercio inferior de la
+      // pantalla y tapaba las lineas de abajo. El corte no era del WebView: era
+      // de la app. Arriba no hay nada nativo encima.
+      p.style.cssText = 'position:fixed;left:0;top:0;right:0;z-index:2147483000;'
+        + 'font:9px/1.32 monospace;padding:3px 6px;white-space:pre-wrap;'
+        + 'background:rgba(0,0,0,.94);color:#00ffb3;border-bottom:2px solid #00ffb3;'
+        + 'max-height:58vh;overflow:auto';
       // Solo se ANADE un nodo propio. No se modifica ningun nodo de la pagina.
       document.documentElement.appendChild(p);
     }

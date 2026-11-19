@@ -548,3 +548,21 @@ corriendo.
 Si con cero interferencia sigue negra: el problema no es nuestro, y a partir de ahi no hay
 nada que probar a ciegas. El siguiente paso deja de ser opcional — `chrome://inspect` por
 USB, con el telefono conectado, para ver el arbol pintado real.
+
+## [1.6.1]
+
+**El panel salia cortado por culpa nuestra, no del WebView.** La 1.6.0 medía bien, pero el
+panel iba anclado abajo (`bottom:0`) y **nuestra propia tarjeta de Compose** —capa nativa,
+siempre por encima del WebView— ocupa el tercio inferior de la pantalla. Las líneas que
+faltaban (`form=`, `caja=`, `arriba=`, `docH=`, `url=`) no se habían perdido: estaban
+tapadas por la app.
+
+- El panel pasa a `top:0`, justo debajo de la barra de la app, donde no hay ninguna capa
+  nativa encima. Fuente 9 px y `max-height:58vh` para que quepan las siete líneas.
+- Sin más cambios: la página sigue con **cero interferencia** (solo `HOST_BRIDGE + MEASURE`).
+
+Un detalle que ya sabemos y conviene no perder de vista: `nodos=99` y `hojas=5 reglas=18
+cruzadas=2`. Las 2 hojas «cruzadas» son las de `accounts.scdn.co`: **sí llegaron** (si no,
+no serían hojas), solo que su `cssRules` no es legible por origen. Y 99 nodos es poco para
+una página de Next.js ya hidratada, así que la pregunta abierta es si el JS de Spotify está
+corriendo.

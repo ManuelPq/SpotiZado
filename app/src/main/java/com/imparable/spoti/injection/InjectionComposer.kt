@@ -36,6 +36,7 @@ class InjectionComposer(private val context: Context) {
         const val PROBE = DIR + "90_probe.js"
         const val CALIB = DIR + "95_calib.js"
         const val AD_STATE = DIR + "25_adstate.js"
+        const val CLASSIC = DIR + "62_classic.js"
         const val UNHIDE = DIR + "65_unhide.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
@@ -67,7 +68,10 @@ class InjectionComposer(private val context: Context) {
 
     fun buildEnvSpoofScript(): String = if (clean) "" else load(ENV_SPOOF)
 
-    fun buildLoginScript(): String = if (clean) "" else load(HOST_BRIDGE) + load(LOGIN)
+    fun buildLoginScript(): String = if (clean) "" else
+        load(HOST_BRIDGE) + load(LOGIN) + load(CLASSIC) +
+            "window.__spotiCalibOn=${settings.calibration};" +
+            load(UNHIDE)
 
     fun buildProbeScript(): String = if (clean) "" else load(PROBE)
 

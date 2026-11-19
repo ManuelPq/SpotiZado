@@ -1,5 +1,28 @@
 # Historial de versiones — SpotiZado
 
+## [1.2.1]
+
+**Causa raiz encontrada, y es un fallo nuestro de cableado.** El diagnostico de la 1.2.0
+en el movil decia `campos=1 · pwd=no · visible=no`: el campo del formulario **existe en el
+DOM** pero no se pinta. Y no se pintaba porque `65_unhide.js` — el script que fuerza la
+visibilidad de la cadena de ancestros — **no se inyectaba en la pagina de login**.
+`buildLoginScript()` cargaba solo `HOST_BRIDGE + LOGIN + CLASSIC`.
+
+La cabecera de `65_unhide.js` ya documentaba la medicion que lo prueba: la caja del
+formulario estaba correcta (`left=24 top=274 w=336 h=52`) y aun asi no se pintaba; al
+forzar `opacity`/`visibility`/`overflow` en la cadena, **el formulario aparece**. Es decir:
+el arreglo existia desde la 1.0.9 pero solo se aplicaba al reproductor. La pantalla negra
+del login nunca lo recibio.
+
+- `buildLoginScript()` pasa a cargar tambien `65_unhide.js`, con
+  `window.__spotiCalibOn` puesto al valor del ajuste antes de cargarlo.
+- Anadido `62_classic.js`: boton fijo "Entrar con email y contraseña" que navega a la
+  misma pagina con `?allow_password=1` (la pagina servida por Spotify ya es *passwordless*,
+  sin campo de contraseña). No se inyecta si ya hay `input[type=password]`.
+- `PlayerViewModel.openClassicLogin()` y el boton correspondiente en el aviso.
+
+Sin mas cambios: la configuracion de WebView de la 1.2.0 queda intacta.
+
 ## [1.1.1]
 
 Extraído del **dex** del APK de SpotiDuck v1.2.7 (`strings` sobre `classes.dex`). Dos

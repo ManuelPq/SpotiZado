@@ -505,10 +505,11 @@ private fun noticeFor(state: PlayerViewModel.UiState): Notice? = when {
             )
         } else {
             Notice(
-                "Falta iniciar sesión",
-                "Si no ves el formulario, pulsa «Abrir login con email».",
-                NoticeAction.LOGIN
-            )
+            "Falta iniciar sesión con contraseña",
+            "Spotify abre el acceso sin contraseña. El botón verde de abajo en la página, " +
+                "o este de aquí, lleva al formulario de email.",
+            NoticeAction.LOGIN
+        )
         }
 
     // Sesión no detectada y sin reproductor a la vista (la portada pública de
@@ -662,6 +663,9 @@ if (expanded) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Button(onClick = { viewModel.openLogin() }) {
                                 Text("Abrir login con email")
+                            }
+                            Button(onClick = { viewModel.openClassicLogin() }) {
+                                Text("Entrar con email y contraseña")
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 AssistChip(

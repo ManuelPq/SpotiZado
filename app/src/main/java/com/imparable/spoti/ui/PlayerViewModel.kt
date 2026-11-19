@@ -193,6 +193,26 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Login con email y contrasena.
+     *
+     * Es la MISMA pagina de login con `&allow_password=1`. El parametro no puede
+     * ir en la primera carga (Spotify rechaza el intento y sirve la pagina
+     * vacia), pero si en esta segunda navegacion, que es lo que hace el cliente
+     * que funciona en este telefono.
+     *
+     * Existe como boton nativo porque no depende de que la pagina se pinte: si
+     * el WebView no dibuja nada, esto sigue funcionando.
+     */
+    fun openClassicLogin() {
+        val view = PlayerHost.webView ?: return
+        PlayerWebViewFactory.applyProfile(view, desktop = false)
+        val url = PlayerWebViewClient.URL_LOGIN +
+            if (PlayerWebViewClient.URL_LOGIN.contains("?")) "&allow_password=1" else "?allow_password=1"
+        PlayerHost.loadUrl(url)
+    }
+
+
+    /**
      * Abre el login en el navegador del sistema.
      *
      * No sirve para iniciar sesión dentro de la app (las cookies viven en otro

@@ -1,5 +1,28 @@
 # Historial de versiones — SpotiZado
 
+## [1.3.0]
+
+**Hipotesis nueva, y con la prueba al lado.** Con la 1.2.1 el login clasico ya informa
+`campos=2 · pwd=sí · visible=sí · vw=384 · sw=384 · zoom=1.0` y **la pantalla sigue negra**.
+El formulario esta en el DOM, su caja cae dentro de la zona visible... y no se ve ni un
+pixel. Mientras tanto, el boton que inyecta `62_classic.js` (`position:fixed`,
+`z-index:2147483000`) **si se pinta**.
+
+Eso descarta de golpe: DOM, viewport, escala, motor de pintado y WebView. Queda lo unico
+que explica que lo nuestro se vea y lo suyo no: **hay una capa opaca por encima**. Nuestro
+boton se ve porque va por delante de ella.
+
+- Nuevo `66_stack.js`: mide con `document.elementsFromPoint()` en el centro del campo
+  (devuelve la pila real de elementos bajo ese punto, de arriba abajo), recorre ademas los
+  elementos `fixed`/`absolute` que cubren >=85 % de la ventana con fondo opaco, **retira
+  esas capas** (`display:none`) y vuelve a medir para confirmar que el campo queda el
+  primero de la pila. No toca el formulario ni sus valores.
+- Se inyecta en el login despues de `65_unhide.js`. Con la calibracion activa escribe en
+  pantalla: punto medido, pila antes/despues, capas encontradas y cuantas se quitaron.
+
+Si el veredicto es «sin capa: nada tapa el campo», entonces la hipotesis cae y el siguiente
+paso deja de ser adivinar: `chrome://inspect` por USB para ver el arbol pintado de verdad.
+
 ## [1.2.1]
 
 **Causa raiz encontrada, y es un fallo nuestro de cableado.** El diagnostico de la 1.2.0

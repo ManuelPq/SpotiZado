@@ -137,10 +137,15 @@ object PlayerWebViewFactory {
         // que no son el reproductor (login, consentimiento, redirecciones): ahi
         // no hay video ni DRM que perder, y el coste es irrelevante para un
         // formulario. El reproductor mantiene HARDWARE.
+        // Fuera del reproductor no se fuerza NINGUNA capa: `LAYER_TYPE_NONE`, el
+        // comportamiento por defecto, que es exactamente lo que hace Chrome. La
+        // 1.4.0 probo SOFTWARE y la 1.0.10 HARDWARE; el testigo demostro que el
+        // motor pinta bien (A, B y C se veian), asi que la capa no era el asunto
+        // y lo correcto es dejar de tocarla.
         val layer = if (desktop) {
             android.view.View.LAYER_TYPE_HARDWARE
         } else {
-            android.view.View.LAYER_TYPE_SOFTWARE
+            android.view.View.LAYER_TYPE_NONE
         }
         runCatching { webView.setLayerType(layer, null) }
 

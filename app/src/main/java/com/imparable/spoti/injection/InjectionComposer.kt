@@ -41,6 +41,7 @@ class InjectionComposer(private val context: Context) {
         const val STACK = DIR + "66_stack.js"
         const val WITNESS = DIR + "67_witness.js"
         const val UI = DIR + "68_ui.js"
+        const val MEASURE = DIR + "69_measure.js"
 
         /** Ajustes vigentes (los actualiza SpotiApp desde DataStore). */
         @Volatile
@@ -71,10 +72,21 @@ class InjectionComposer(private val context: Context) {
 
     fun buildEnvSpoofScript(): String = if (clean) "" else load(ENV_SPOOF)
 
+    /**
+     * Pagina de login: **cero interferencia**.
+     *
+     * La 1.5.0 dejaba claro que seguir culpando a Spotify no se sostiene: con
+     * nuestro CSS de respaldo aplicado (texto blanco, campos con borde), tampoco
+     * se veia nada. Antes de nada hay que descartar al unico sospechoso que queda
+     * y que nunca se habia quitado de en medio: nuestras propias inyecciones.
+     *
+     * Aqui ya no se carga `65_unhide` (forzaba opacity/transform/filter/clip en
+     * toda la cadena), ni `62_classic` (añadia un enlace), ni `68_ui` (inyectaba
+     * CSS). Solo el puente y una medida de solo lectura que escribe en un panel
+     * propio. Si la pagina sigue negra asi, el problema no es nuestro.
+     */
     fun buildLoginScript(): String = if (clean) "" else
-        load(HOST_BRIDGE) + load(LOGIN) + load(CLASSIC) +
-            "window.__spotiCalibOn=${settings.calibration};" +
-            load(UNHIDE) + load(UI)
+        load(HOST_BRIDGE) + load(MEASURE)
 
     fun buildProbeScript(): String = if (clean) "" else load(PROBE)
 

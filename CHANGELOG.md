@@ -511,3 +511,40 @@ negro. Y los campos de un formulario sin estilos, con ese fondo, tampoco se ven.
   medido), asi que el panel es un canal fiable aunque la pagina este negra.
 - Se retiran `66_stack.js` y `67_witness.js` del login: ya dieron su respuesta y solo
   añadian ruido.
+
+## [1.6.0]
+
+**Version de cero interferencia.** La 1.5.0 midio esto en el dispositivo:
+
+    hojas=7 reglas=22 inaccesibles=2 nodos=102
+    bodyBg=rgb(18,18,18) bodyFg=rgb(255,255,255)
+
+Ese fondo y ese color **son de nuestro CSS de respaldo**, inyectado en la primera pasada
+(cuando aun habia menos de 20 nodos) y ahi se quedo. O sea: no hay ninguna prueba de que
+Spotify aplique su CSS, y ademas no se ve **ni una** de las cajas con borde y fondo que ese
+respaldo dibuja. Una hipotesis que no explica el dato que tenemos delante no es una
+hipotesis, es una excusa.
+
+Asi que se quita del medio el unico sospechoso que nunca se habia apartado: **nosotros**.
+
+- `buildLoginScript()` en la pagina de login pasa a ser `HOST_BRIDGE + MEASURE`, y nada mas.
+  Desaparecen de ahi `65_unhide` (forzaba `opacity`, `visibility`, `clip-path`, `overflow`,
+  `transform` y `filter` en toda la cadena de ancestros del campo), `62_classic` (añadia un
+  enlace) y `68_ui` (inyectaba CSS).
+- La capa de pintado del login pasa a **`LAYER_TYPE_NONE`**, el comportamiento por defecto
+  del WebView, que es lo que hace Chrome. La 1.0.10 forzo HARDWARE y la 1.4.0 SOFTWARE; el
+  testigo de la 1.4.0 demostro que el motor pinta bien, asi que la capa nunca fue el asunto.
+- Nuevo `69_measure.js`: **solo lee**. Numero de hojas, reglas, nodos, `display`/`opacity`
+  del form, caja del campo, **quien esta arriba en el centro del campo** segun
+  `elementFromPoint`, colores calculados, `docH` y estado de fuentes. Lo pinta en un panel
+  propio, sin tocar un solo nodo de la pagina.
+
+**Lo que hay que entender del resultado.** El campo `arriba=` es el juez: dice si en el
+punto exacto del campo lo primero que hay es el propio campo (`=CAMPO`) o si hay otra cosa
+encima (`TAPA`). Y `nodos` dice si la pagina se construyo de verdad: 102 nodos no es una
+pagina de login completa de Next.js; si sigue en ~100, el JavaScript de Spotify no esta
+corriendo.
+
+Si con cero interferencia sigue negra: el problema no es nuestro, y a partir de ahi no hay
+nada que probar a ciegas. El siguiente paso deja de ser opcional — `chrome://inspect` por
+USB, con el telefono conectado, para ver el arbol pintado real.

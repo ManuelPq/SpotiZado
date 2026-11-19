@@ -67,7 +67,7 @@ class PlayerWebViewClient(
          *    pantalla vacía, que es la zona negra que llevamos viendo toda la tarde.
          */
         const val URL_LOGIN =
-            "https://accounts.spotify.com/en/login?continue=https%3A%2F%2Fopen.spotify.com%2F"
+            "https://accounts.spotify.com/login?continue=https%3A%2F%2Fopen.spotify.com%2F"
 
         const val PREFIX_PLAYER = "https://open.spotify.com"
         private const val FACEBOOK_CONSENT = "https://www.facebook.com/privacy/consent/gdp/"

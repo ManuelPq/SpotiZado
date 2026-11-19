@@ -90,34 +90,50 @@ object PlayerWebViewFactory {
      */
     fun applyProfile(webView: WebView, desktop: Boolean) {
         with(webView.settings) {
-            userAgentString = buildUserAgent(webView.context, desktop)
-            // En perfil movil se usa el comportamiento normal del WebView para
-            // una pagina movil: `useWideViewPort=false` deja que la pagina use el
-            // ancho del dispositivo tal cual, sin modo panoramico ni escalas
-            // impuestas. Antes `useWideViewPort` era `true` SIEMPRE, lo que en la
-            // pagina de login activaba el modo panoramico (ancho de 980 px) y con
-            // el zoom automatico reducia el formulario a una franja minuscula.
-            useWideViewPort = desktop
-            loadWithOverviewMode = desktop
-            // Sin esto, la página de login se dibuja a 980 px y no se ve el formulario.
-            // `loadWithOverviewMode` solo en el reproductor.
+            // UA: **nativo** en login, escritorio solo al llegar al reproductor.
             //
-            // Es la causa de que el formulario de login quedara minusculo: con
-            // overview activo el WebView reduce la pagina ENTERA (que es alta)
-            // para encajarla en la pantalla. Medido en el dispositivo:
-            // vw=384, sw=384 (sin desbordamiento) y el formulario a ~5 % de la
-            // pantalla, con scroll. El viewport de maquetacion era correcto, asi
-            // que ninguna medida anterior podia detectarlo: lo que estaba mal era
-            // la ESCALA VISUAL. Se anade esa medida a la sonda.
-            loadWithOverviewMode = desktop
-            // `setInitialScale(100)` era el segundo clavo: fuerza el zoom a 1.0 y
-            // anula el encaje automatico de `useWideViewPort`+`loadWithOverviewMode`.
-            // Medido en el dispositivo: 1920 px de maquetacion a zoom 1.0 dentro de
-            // una ventana de 384 dp -> scroll en los dos sentidos. Con 0 decide el
-            // WebView, que es quien conoce el tamano real de la vista.
-            webView.setInitialScale(0)
+            // Esto corrige un error mío de la 1.1.1. Allí fijé un UA de Chrome a
+            // mano para todas las páginas. El cliente que SÍ funciona en este mismo
+            // teléfono (Quackify, continuación de SpotiDuck) hace lo contrario:
+            // usa `WebSettings.getDefaultUserAgent` en el login y cambia a
+            // escritorio solo cuando ya está en open.spotify.com. Su comentario
+            // literal: «init ua=native, desktop only on the player».
+            //
+            // Si el UA fijado no arregló nada, no era el problema. Se vuelve al
+            // nativo, que es lo que usa el que funciona.
+            userAgentString = if (desktop) UA_DESKTOP else nativeUserAgent(webView)
+
+            // `useWideViewPort` y `loadWithOverviewMode` SIEMPRE activos, como en
+            // el cliente que funciona. En 1.0.x los desactivábamos en el login
+            // persiguiendo el fallo del 980 px; con el meta viewport ya forzado a
+            // `device-width`, activarlos es lo correcto: dejan que el WebView
+            // encaje la página en la vista sin imponer una escala fija.
+            useWideViewPort = true
+            loadWithOverviewMode = true
+
+        }
+
+        // `setInitialScale` NO se llama. Esa llamada no es neutra: resetea la
+        // escala y deshace el encaje automático que acaban de habilitar
+        // `useWideViewPort` y `loadWithOverviewMode`. El cliente que SÍ funciona
+        // en este teléfono no la invoca en ningún momento.
+
+        // Cookies de terceros: el login y el reproductor las necesitan (el flujo
+        // de accounts.spotify.com deja cookies para open.spotify.com). El cliente
+        // que funciona las acepta explícitamente y nosotros no las tocábamos.
+        runCatching<Unit> {
+            val cm = android.webkit.CookieManager.getInstance()
+            cm.setAcceptCookie(true)
+            cm.setAcceptThirdPartyCookies(webView, true)
         }
     }
+
+    /** UA real del motor, sin derivar ni limpiar. */
+    private fun nativeUserAgent(webView: WebView): String =
+        runCatching { WebSettings.getDefaultUserAgent(webView.context) }
+            .getOrNull()
+            ?.takeIf { it.isNotBlank() }
+            ?: UA_MOBILE
 
     @SuppressLint("SetJavaScriptEnabled")
     fun create(context: Context, bridge: PlayerBridge, desktopMode: Boolean): WebView {
@@ -128,9 +144,6 @@ object PlayerWebViewFactory {
             domStorageEnabled = true
             databaseEnabled = true
             mediaPlaybackRequiresUserGesture = false
-            useWideViewPort = true
-            loadWithOverviewMode = true
-
             // Las tres líneas siguientes son la diferencia con Spotifuck 1.6.4.1,
             // que es la app que SÍ funcionaba. Con `useWideViewPort=true` y
             // `loadWithOverviewMode=true` la página se maqueta con un ancho de
@@ -142,7 +155,10 @@ object PlayerWebViewFactory {
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
 
-            builtInZoomControls = false
+            // El cliente que funciona los deja ACTIVADOS (con los controles
+            // ocultos). Desactivarlos impide el zoom por gesto, que es la única
+            // forma de leer una página que no se ajusta sola.
+            builtInZoomControls = true
             displayZoomControls = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             allowFileAccess = false
